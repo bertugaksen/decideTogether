@@ -167,7 +167,9 @@ export const MatchCelebration: React.FC<MatchCelebrationProps> = ({
               alt={venue.name}
               className="w-full h-full object-cover"
               onError={(e) => {
-                (e.target as HTMLImageElement).src = FALLBACK_IMAGE;
+                const img = e.currentTarget;
+                img.onerror = null;
+                img.src = FALLBACK_IMAGE;
               }}
             />
             {venue.isSponsored && (

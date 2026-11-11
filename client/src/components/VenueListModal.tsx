@@ -76,7 +76,9 @@ export const VenueListModal: React.FC<VenueListModalProps> = ({
                       className="w-full h-full object-cover"
                       loading="lazy"
                       onError={(e) => {
-                        (e.target as HTMLImageElement).src =
+                        const img = e.currentTarget;
+                        img.onerror = null;
+                        img.src =
                           'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=400&q=80';
                       }}
                     />

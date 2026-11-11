@@ -49,7 +49,9 @@ export const VenueCard: React.FC<VenueCardProps> = ({ venue, onSwipe, isTop }) =
           draggable={false}
           className="w-full h-3/5 object-cover pointer-events-none"
           onError={(e) => {
-            (e.target as HTMLImageElement).src = FALLBACK_IMAGE;
+            const img = e.currentTarget;
+            img.onerror = null;
+            img.src = FALLBACK_IMAGE;
           }}
         />
         <div className="p-5">
@@ -112,7 +114,9 @@ export const VenueCard: React.FC<VenueCardProps> = ({ venue, onSwipe, isTop }) =
           draggable={false}
           className="w-full h-full object-cover pointer-events-none"
           onError={(e) => {
-            (e.target as HTMLImageElement).src = FALLBACK_IMAGE;
+            const img = e.currentTarget;
+            img.onerror = null;
+            img.src = FALLBACK_IMAGE;
           }}
         />
         {venue.isSponsored && (
