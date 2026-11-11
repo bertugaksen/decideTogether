@@ -1,4 +1,4 @@
-import { Venue, District, RoomLocation } from '../types.js';
+import { Venue, District, RoomLocation, cleanTurkishVenueName } from '../types.js';
 import { VenueCache, getCoordinateCacheKey } from './venueCache.js';
 import { MOCK_DISTRICTS, MOCK_VENUES, SPONSORED_CANDIDATES } from './mockVenues.js';
 import {
@@ -370,6 +370,7 @@ export async function fetchGooglePlacesNearby(
         includedTypes: ['restaurant', 'cafe', 'fast_food_restaurant', 'bakery'],
         maxResultCount: 20,
         rankPreference: 'POPULARITY',
+        languageCode: 'tr',
         locationRestriction: {
           circle: {
             center: { latitude: lat, longitude: lng },
@@ -403,7 +404,7 @@ export async function fetchGooglePlacesNearby(
 
       const baseVenue: Venue = {
         id: `gplace_${p.id}`,
-        name: p.displayName?.text || 'Bilinmeyen Restoran',
+        name: cleanTurkishVenueName(p.displayName?.text) || 'Bilinmeyen Restoran',
         category: formatCategoryName(p.primaryTypeDisplayName?.text),
         rating: typeof p.rating === 'number' ? p.rating : 4.5,
         reviewCount: typeof p.userRatingCount === 'number' ? p.userRatingCount : 100,

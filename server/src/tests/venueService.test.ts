@@ -8,6 +8,7 @@ import {
   categorizeVenue,
   balanceDeckDiversity,
 } from '../services/venueService.js';
+import { cleanTurkishVenueName } from '@decidetogether/shared';
 import { MOCK_DISTRICTS, MOCK_VENUES } from '../services/mockVenues.js';
 
 test('isValidCoordinate - validates lat and lng ranges strictly (T-02-04)', () => {
@@ -126,4 +127,16 @@ test('balanceDeckDiversity - alternates culinary categories and eliminates conse
   const cat1 = categorizeVenue(balanced[1]);
   assert.notStrictEqual(cat0, cat1, 'First two cards must have distinct culinary categories');
 });
+
+test('cleanTurkishVenueName - normalizes all-caps and ASCII typos to proper Turkish orthography', () => {
+  assert.strictEqual(cleanTurkishVenueName('BİRBİÇER KEBAP'), 'Birbiçer Kebap');
+  assert.strictEqual(cleanTurkishVenueName('Sirdanci Bedo'), 'Şırdancı Bedo');
+  assert.strictEqual(cleanTurkishVenueName('CİGERCİ MEMET USTA'), 'Ciğerci Memet Usta');
+  assert.strictEqual(cleanTurkishVenueName('Borekci Riza'), 'Börekçi Rıza');
+  assert.strictEqual(cleanTurkishVenueName('KAZANCILAR CARSISI'), 'Kazancılar Çarşısı');
+  assert.strictEqual(cleanTurkishVenueName("McDonald's Adana Galleria"), "McDonald's Adana Galleria");
+  assert.strictEqual(cleanTurkishVenueName('KFC Kadıköy'), 'KFC Kadıköy');
+  assert.strictEqual(cleanTurkishVenueName('ASUMAN ÇİKOLATA VE KAHVE'), 'Asuman Çikolata ve Kahve');
+});
+
 
