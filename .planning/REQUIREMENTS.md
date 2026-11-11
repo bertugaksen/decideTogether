@@ -38,6 +38,13 @@
 - [x] **ACTION-02**: `🧭 Yol Tarifi Al` butonu doğrudan Google Maps navigasyon rotasını başlatır.
 - [x] **ACTION-03**: `🛵 Sipariş Ver / 📞 Ara` butonu yemek sipariş aramasını veya telefon aramasını açar.
 
+### Mobile UX & Location Polish (MOB)
+
+- [ ] **MOB-01**: Sola ve sağa kart kaydırma yönü kullanıcının sürükleme yönüne (`like` -> sağ, `pass` -> sol) kilitlenmeli, bırakma anında `x` yaylanmasından bağımsız olarak doğru yöne uçmalıdır.
+- [ ] **MOB-02**: Sponsorlu mekan enjeksiyonu sadece o ilçeye/şehre ait sponsorları içermelidir; Adana seçildiğinde Kadıköy mekanı listeye sızmamalıdır.
+- [ ] **MOB-03**: Google Haritalar `Yol Tarifi Al` butonu sabit sunucu koordinatı yerine dinamik olarak telefonun canlı konumunu (`Konumunuz`) başlangıç noktası olarak almalıdır.
+- [ ] **MOB-04**: `Sipariş Ver` butonları ve harici link geçişlerinde mobilde WebSocket arka plana düştüğünde kullanıcı odadan atılmamalı; eşleşme kutlaması sekmeler arası geçişte kalıcı olmalıdır.
+
 ## Traceability
 
 | Requirement | Phase | Status |
@@ -60,7 +67,12 @@
 | ACTION-01 | Phase 5 | Complete |
 | ACTION-02 | Phase 5 | Complete |
 | ACTION-03 | Phase 5 | Complete |
+| MOB-01 | Phase 6 | Planned |
+| MOB-02 | Phase 6 | Planned |
+| MOB-03 | Phase 6 | Planned |
+| MOB-04 | Phase 6 | Planned |
 
 **Coverage:**
-- v1 requirements: 18 total
-- Completed: 18 / 18 (100%) ✓
+- v1 requirements: 22 total
+- Completed: 18 / 22 (82%)
+- Planned: 4 / 22

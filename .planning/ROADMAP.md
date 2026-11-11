@@ -11,6 +11,7 @@ DecideTogether, çiftlerin "Ne yesek?" kararsızlığını 10 saniyelik eğlence
 - [x] **Phase 3: Gesture Deck & Instant Match Celebration** - Framer Motion kart sürükleme fiziği ve anlık eşleşme kutlaması.
 - [x] **Phase 4: Rapid Tapper Tie-Breaker Duel** - Beraberlikte 5 saniyelik adil online/tek-telefon parmak güreşi düellosu.
 - [x] **Phase 5: Post-Match Navigation & Delivery Actions** - Google Maps navigasyon başlatma ve sipariş arama entegrasyonu.
+- [ ] **Phase 6: Mobile UX, Swipe Physics & Location Navigation Polish**
 
 ## Phase Details
 
@@ -57,10 +58,25 @@ Plans:
 - [x] 05-01-PLAN.md — Server Post-Match Action Link Engine, 7-District Complete Datasets & Room Lifecycle Bug Fixes
 - [x] 05-02-PLAN.md — Client MatchCelebration Navigation/Delivery/Call Actions & Touch/Socket Bug Fixes
 
+### Phase 6: Mobile UX, Swipe Physics & Location Navigation Polish
+**Goal:** Telefondaki canlı testlerde tespit edilen kart kaydırma fiziği, şehir/sponsor izolasyonu, Google Haritalar canlı GPS rotası ve mobil sipariş yönlendirme dayanıklılığını çözmek.
+**Requirements**: MOB-01, MOB-02, MOB-03, MOB-04
+**Depends on:** Phase 5
+**Success Criteria** (what must be TRUE):
+  1. Kart sola kaydırıldığında daima sola (-600), sağa kaydırıldığında daima sağa (+600) akıcı yay fiziğiyle fırlar.
+  2. Adana veya başka bir ilçe seçildiğinde listeye farklı bir şehre ait (Kadıköy vb.) sponsorlu mekan asla sızmaz.
+  3. `🧭 Yol Tarifi Al` butonu sabit sunucu koordinatını değil, telefonun canlı konumunu (`Konumunuz`) rota başlangıcı olarak açar.
+  4. `🛵 Sipariş Ver` seçenekleri açıldığında veya sekmeler arası geçişte WebSocket arka planda kopsa bile kullanıcı odadan atılmaz; eşleşme oturumu korunur.
+**Plans:** 2 plans
+
+Plans:
+- [ ] 06-01-PLAN.md — Backend Regional Sponsor Filter, Dynamic GPS Navigation URL & Match State Persistence
+- [ ] 06-02-PLAN.md — Client Swipe Gesture Direction Locking, Tactile Feedback & Mobile Delivery Modal Flow
+
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
+Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
@@ -69,3 +85,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | 3. Gesture Deck & Instant Match Celebration | 2/2 | Complete | 2026-11-08 |
 | 4. Rapid Tapper Tie-Breaker Duel | 2/2 | Complete | 2026-11-09 |
 | 5. Post-Match Navigation & Delivery Actions | 2/2 | Complete | 2026-11-11 |
+| 6. Mobile UX, Swipe Physics & Location Navigation Polish | 0/2 | Planned | - |
