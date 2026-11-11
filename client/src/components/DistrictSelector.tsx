@@ -94,7 +94,7 @@ export const DistrictSelector: React.FC<DistrictSelectorProps> = ({
       <div className="absolute inset-0" onClick={onClose} />
 
       {/* Modal / Bottom Sheet Card */}
-      <div className="relative w-full max-w-md bg-[#FBF9F5] rounded-t-3xl sm:rounded-2xl border border-[#E7E2D9] p-6 shadow-xl space-y-4 max-h-[90vh] overflow-y-auto animate-in fade-in zoom-in-95 duration-150">
+      <div className="relative w-full max-w-md bg-[#FBF9F5] rounded-t-3xl sm:rounded-2xl border border-[#E7E2D9] p-6 shadow-xs space-y-4 max-h-[90vh] overflow-y-auto animate-in fade-in zoom-in-95 duration-150">
         {/* Header */}
         <div className="flex items-center justify-between pb-3 border-b border-[#E7E2D9]">
           <div className="flex items-center gap-2">

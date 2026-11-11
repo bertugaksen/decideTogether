@@ -198,7 +198,7 @@ export const SwipeDeck: React.FC<SwipeDeckProps> = ({
 
       {/* Interactive Card Stack Container */}
       <div className="relative flex-1 my-3 flex items-center justify-center">
-        <div className="relative w-full max-w-[340px] aspect-[3/4.4]">
+        <div className="relative w-[calc(100vw-36px)] max-w-[340px] aspect-[3/4.4]">
           <AnimatePresence mode="popLayout">
             {nextCard && (
               <VenueCard key={nextCard.id} venue={nextCard} isTop={false} onSwipe={() => {}} />

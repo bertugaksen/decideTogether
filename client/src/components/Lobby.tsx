@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useRoomSocket } from '../hooks/useRoomSocket.js';
+import type { useRoomSocket } from '../hooks/useRoomSocket.js';
 import { MapPin, Sparkles, AlertCircle } from 'lucide-react';
 import logoImg from '../assets/logo.jpg';
 import { DistrictSelector } from './DistrictSelector.js';
@@ -9,12 +9,10 @@ import { RoomWaitingView } from './RoomWaitingView.js';
 import { RoomLocation } from '../types.js';
 
 export interface LobbyProps {
-  socket?: ReturnType<typeof useRoomSocket>;
+  socket: ReturnType<typeof useRoomSocket>;
 }
 
-export const Lobby: React.FC<LobbyProps> = ({ socket: externalSocket }) => {
-  const localSocket = useRoomSocket();
-  const socket = externalSocket || localSocket;
+export const Lobby: React.FC<LobbyProps> = ({ socket }) => {
   const {
     room,
     currentUser,

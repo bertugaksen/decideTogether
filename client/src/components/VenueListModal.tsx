@@ -26,7 +26,7 @@ export const VenueListModal: React.FC<VenueListModalProps> = ({
     >
       <div className="absolute inset-0" onClick={onClose} />
 
-      <div className="relative w-full max-w-lg bg-[#FBF9F5] rounded-t-3xl sm:rounded-2xl border border-[#E7E2D9] p-6 shadow-xl space-y-4 max-h-[85vh] flex flex-col animate-in fade-in zoom-in-95 duration-150">
+      <div className="relative w-full max-w-lg bg-[#FBF9F5] rounded-t-3xl sm:rounded-2xl border border-[#E7E2D9] p-6 shadow-xs space-y-4 max-h-[85vh] flex flex-col animate-in fade-in zoom-in-95 duration-150">
         {/* Header */}
         <div className="flex items-center justify-between pb-3 border-b border-[#E7E2D9] shrink-0">
           <div className="flex items-center gap-2.5">
