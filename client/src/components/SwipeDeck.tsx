@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Heart, X, MapPin, Users } from 'lucide-react';
 import { Room, Participant, Venue, DuelState } from '../types.js';
 import { VenueCard } from './VenueCard.js';
@@ -47,12 +47,24 @@ export const SwipeDeck: React.FC<SwipeDeckProps> = ({
   const [currentIndex, setCurrentIndex] = useState(savedCardIndex);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [exitDirection, setExitDirection] = useState<'left' | 'right' | null>(null);
+  const [showCelebrationModal, setShowCelebrationModal] = useState(false);
 
   useEffect(() => {
     if (savedCardIndex > currentIndex) {
       setCurrentIndex(savedCardIndex);
     }
   }, [savedCardIndex, currentIndex]);
+
+  useEffect(() => {
+    if (matchedVenue) {
+      const timer = setTimeout(() => {
+        setShowCelebrationModal(true);
+      }, 500);
+      return () => clearTimeout(timer);
+    } else {
+      setShowCelebrationModal(false);
+    }
+  }, [matchedVenue]);
 
   const handleCardSwipe = useCallback(
     (direction: 'like' | 'pass') => {
@@ -93,8 +105,23 @@ export const SwipeDeck: React.FC<SwipeDeckProps> = ({
     );
   }
 
-  // 2. If match detected, render celebration overlay with duelResult and roomLocation
+  // 2. If match detected, handle match climax scale-up before showing celebration overlay
   if (matchedVenue) {
+    if (!showCelebrationModal) {
+      return (
+        <div className="max-w-md mx-auto h-[100dvh] px-4 py-4 flex flex-col items-center justify-center select-none overflow-hidden">
+          <motion.div
+            initial={{ scale: 1, rotate: 0 }}
+            animate={{ scale: 1.05 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+            className="relative w-full max-w-[340px] aspect-[3/4.4]"
+          >
+            <VenueCard venue={matchedVenue} isTop={true} onSwipe={() => {}} />
+          </motion.div>
+        </div>
+      );
+    }
+
     const winnerNickname = duelState?.winnerId
       ? room.participants[duelState.winnerId]?.nickname ||
         (duelState.winnerId === currentUser.id ? currentUser.nickname : peer?.nickname)
@@ -145,7 +172,7 @@ export const SwipeDeck: React.FC<SwipeDeckProps> = ({
       <header className="pb-2">
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-1.5 text-xs font-semibold text-[#1C1917]">
-            <MapPin className="w-3.5 h-3.5 text-[#D9381E] shrink-0" />
+            <MapPin className="w-3.5 h-3.5 text-[#E07A5F] shrink-0" />
             <span className="truncate max-w-[160px]">{room.location?.label || 'Bölge'}</span>
           </div>
 
@@ -163,7 +190,7 @@ export const SwipeDeck: React.FC<SwipeDeckProps> = ({
         {/* User Progress Bar */}
         <div className="w-full bg-[#E7E2D9] h-1.5 rounded-full overflow-hidden">
           <div
-            className="bg-[#D9381E] h-full rounded-full transition-all duration-300 ease-out"
+            className="bg-[#2D6A4F] h-full rounded-full transition-all duration-300 ease-out"
             style={{ width: `${userProgressPercent}%` }}
           />
         </div>
@@ -196,7 +223,7 @@ export const SwipeDeck: React.FC<SwipeDeckProps> = ({
           type="button"
           disabled={isTransitioning}
           onClick={() => handleCardSwipe('pass')}
-          className="w-16 h-16 rounded-full bg-white border-2 border-[#E7E2D9] hover:border-[#D9381E] text-[#D9381E] flex items-center justify-center shadow-lg active:scale-90 transition-all cursor-pointer disabled:opacity-50"
+          className="w-16 h-16 rounded-full bg-white border border-[#E7E2D9] hover:border-[#D9381E] text-[#D9381E] flex items-center justify-center active:scale-[0.98] transition-transform duration-100 cursor-pointer disabled:opacity-50"
           aria-label="Pas Geç"
         >
           <X className="w-8 h-8 stroke-[2.5]" />
@@ -207,7 +234,7 @@ export const SwipeDeck: React.FC<SwipeDeckProps> = ({
           type="button"
           disabled={isTransitioning}
           onClick={() => handleCardSwipe('like')}
-          className="w-16 h-16 rounded-full bg-[#2D6A4F] text-white flex items-center justify-center shadow-lg hover:bg-[#24543E] active:scale-90 transition-all cursor-pointer disabled:opacity-50"
+          className="w-16 h-16 rounded-full bg-[#2D6A4F] border border-[#2D6A4F] text-white flex items-center justify-center hover:bg-[#24543F] active:scale-[0.98] transition-transform duration-100 cursor-pointer disabled:opacity-50"
           aria-label="Beğen"
         >
           <Heart className="w-8 h-8 fill-white stroke-none" />

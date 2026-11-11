@@ -22,8 +22,8 @@ export const VenueCard: React.FC<VenueCardProps> = ({
   const x = useMotionValue(0);
   const [internalExitDir, setInternalExitDir] = useState<'left' | 'right' | null>(null);
 
-  // Smooth tilt rotation proportional to horizontal drag distance (-18deg to +18deg)
-  const rotate = useTransform(x, [-200, 200], [-18, 18]);
+  // Smooth tilt rotation proportional to horizontal drag distance (val * 0.05, 5deg per 100px)
+  const rotate = useTransform(x, (val) => val * 0.05);
 
   // Stamp opacities reveal progressively as user drags past 20px
   const likeOpacity = useTransform(x, [20, 100], [0, 1]);
@@ -68,7 +68,7 @@ export const VenueCard: React.FC<VenueCardProps> = ({
         />
         <div className="p-5">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-[#D9381E] uppercase tracking-wider">
+            <span className="text-xs font-semibold text-[#E07A5F] uppercase tracking-wider">
               {venue.category}
             </span>
             <div className="flex items-center gap-1 bg-[#F5F0EB] px-2 py-0.5 rounded-lg text-xs font-bold text-[#1C1917]">
@@ -95,6 +95,7 @@ export const VenueCard: React.FC<VenueCardProps> = ({
       drag="x"
       dragConstraints={{ left: 0, right: 0 }}
       dragElastic={0.75}
+      dragTransition={{ bounceStiffness: 300, bounceDamping: 20 }}
       onDragEnd={handleDragEnd}
       exit={{
         x: effectiveExitDirection === 'right' ? 800 : -800,
@@ -138,7 +139,7 @@ export const VenueCard: React.FC<VenueCardProps> = ({
       <div className="p-5 flex flex-col justify-between h-2/5">
         <div>
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-[#D9381E] uppercase tracking-wider">
+            <span className="text-xs font-semibold text-[#E07A5F] uppercase tracking-wider">
               {venue.category}
             </span>
             <div className="flex items-center gap-1 bg-[#F5F0EB] px-2 py-0.5 rounded-lg text-xs font-bold text-[#1C1917]">
