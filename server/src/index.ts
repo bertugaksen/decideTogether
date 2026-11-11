@@ -49,12 +49,14 @@ app.get('/api/locations/resolve', async (req, res) => {
 });
 
 // Photo Proxy Endpoint (VENUE-02 - protects GOOGLE_PLACES_API_KEY from exposure, T-02-01)
+const VALID_PHOTO_NAME_REGEX = /^places\/[A-Za-z0-9_-]+\/photos\/[A-Za-z0-9_-]+$/;
+
 app.get('/api/venues/photo', async (req, res) => {
   const photoName = req.query.name as string;
   const apiKey = process.env.GOOGLE_PLACES_API_KEY;
   const fallbackUrl = 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=800&q=80';
 
-  if (!photoName || !apiKey) {
+  if (!photoName || !VALID_PHOTO_NAME_REGEX.test(photoName) || !apiKey) {
     return res.redirect(fallbackUrl);
   }
 
