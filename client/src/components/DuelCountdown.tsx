@@ -7,7 +7,7 @@ export interface DuelCountdownProps {
 }
 
 export const DuelCountdown: React.FC<DuelCountdownProps> = ({ onComplete }) => {
-  const [step, setStep] = useState<number>(3); // 3, 2, 1, 0 ('BAŞLA!')
+  const [step, setStep] = useState<number>(3); // 3, 2, 1, 0 ('Başla')
 
   useEffect(() => {
     soundEffects.initOnUserGesture();
@@ -22,7 +22,7 @@ export const DuelCountdown: React.FC<DuelCountdownProps> = ({ onComplete }) => {
           completeTimeout = setTimeout(() => {
             onComplete();
           }, 300);
-          return 0; // "BAŞLA! 🔥"
+          return 0; // "Başla"
         }
         if (prev <= 0) {
           clearInterval(interval);
@@ -42,7 +42,7 @@ export const DuelCountdown: React.FC<DuelCountdownProps> = ({ onComplete }) => {
   if (step < 0) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-xs select-none">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#FBF9F5]/90 backdrop-blur-sm select-none">
       <AnimatePresence mode="wait">
         <motion.div
           key={step}
@@ -53,12 +53,12 @@ export const DuelCountdown: React.FC<DuelCountdownProps> = ({ onComplete }) => {
           className="text-center"
         >
           {step > 0 ? (
-            <span className="font-display font-black text-8xl text-white drop-shadow-lg">
+            <span className="font-display font-bold text-8xl text-[#1C1917]">
               {step}
             </span>
           ) : (
-            <span className="font-display font-black text-6xl text-[#D9381E] drop-shadow-xl animate-pulse">
-              BAŞLA! 🔥
+            <span className="font-display font-bold text-6xl text-[#E07A5F]">
+              Başla
             </span>
           )}
         </motion.div>

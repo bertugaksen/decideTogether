@@ -82,24 +82,33 @@ export const SplitScreenDuelView: React.FC<SplitScreenDuelProps> = ({
   }, [durationMs, onComplete]);
 
   return (
-    <div className="fixed inset-0 select-none overflow-hidden flex flex-col touch-none bg-[#1C1917]">
+    <div
+      style={{ touchAction: 'none' }}
+      className="fixed inset-0 select-none overflow-hidden flex flex-col touch-none bg-[#FBF9F5]"
+    >
       {/* Top Half: Player 1 (Rotated 180° for Seated Opponent) */}
       <div
         onTouchStart={handleP1Touch}
         onPointerDown={handleP1Pointer}
         style={{ touchAction: 'none' }}
-        className="flex-1 bg-[#D9381E] text-white flex flex-col items-center justify-center rotate-180 active:brightness-95 transition-all cursor-pointer select-none"
+        className="flex-1 bg-white text-[#1C1917] flex flex-col items-center justify-center rotate-180 active:bg-[#FAF7F2] transition-colors cursor-pointer select-none"
       >
-        <span className="text-xs uppercase tracking-widest font-bold opacity-80">Oyuncu 1</span>
-        <span className="text-sm uppercase tracking-wider font-extrabold mt-1">DOKUN! 🔥</span>
-        <div className="font-display font-black text-6xl mt-1 tabular-nums">{p1Score}</div>
+        <span className="text-xs uppercase tracking-widest font-semibold text-[#78716C]">
+          Oyuncu 1
+        </span>
+        <span className="text-sm uppercase tracking-wider font-semibold text-[#E07A5F] mt-1">
+          Dokun
+        </span>
+        <div className="font-display font-bold text-6xl text-[#1C1917] mt-1 tabular-nums">
+          {p1Score}
+        </div>
       </div>
 
       {/* Center Dividing Seam (56px per UI-SPEC) */}
-      <div className="h-14 bg-[#1C1917] border-y border-[#3E3835] flex flex-col justify-center px-4 z-10 shrink-0 space-y-1">
-        <div className="w-full bg-[#3E3835] h-1 rounded-full overflow-hidden">
+      <div className="h-14 bg-[#FBF9F5] border-y border-[#E7E2D9] flex flex-col justify-center px-4 z-10 shrink-0 space-y-1">
+        <div className="w-full bg-[#E7E2D9] h-1 rounded-full overflow-hidden">
           <div
-            className="bg-[#D9381E] h-full transition-all duration-75 ease-linear"
+            className="bg-[#E07A5F] h-full transition-all duration-75 ease-linear"
             style={{ width: `${(timeLeftMs / durationMs) * 100}%` }}
           />
         </div>
@@ -111,11 +120,17 @@ export const SplitScreenDuelView: React.FC<SplitScreenDuelProps> = ({
         onTouchStart={handleP2Touch}
         onPointerDown={handleP2Pointer}
         style={{ touchAction: 'none' }}
-        className="flex-1 bg-[#2D6A4F] text-white flex flex-col items-center justify-center active:brightness-95 transition-all cursor-pointer select-none"
+        className="flex-1 bg-white text-[#1C1917] flex flex-col items-center justify-center active:bg-[#FAF7F2] transition-colors cursor-pointer select-none"
       >
-        <span className="text-xs uppercase tracking-widest font-bold opacity-80">Oyuncu 2</span>
-        <span className="text-sm uppercase tracking-wider font-extrabold mt-1">DOKUN! ⚡</span>
-        <div className="font-display font-black text-6xl mt-1 tabular-nums">{p2Score}</div>
+        <span className="text-xs uppercase tracking-widest font-semibold text-[#78716C]">
+          Oyuncu 2
+        </span>
+        <span className="text-sm uppercase tracking-wider font-semibold text-[#2D6A4F] mt-1">
+          Dokun
+        </span>
+        <div className="font-display font-bold text-6xl text-[#1C1917] mt-1 tabular-nums">
+          {p2Score}
+        </div>
       </div>
     </div>
   );

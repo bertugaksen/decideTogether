@@ -86,11 +86,14 @@ export const OnlineDuelView: React.FC<OnlineDuelViewProps> = ({
   const timerPercent = (timeLeftMs / durationMs) * 100;
 
   return (
-    <div className="fixed inset-0 select-none overflow-hidden flex flex-col justify-between bg-[#FBF9F5] touch-none">
+    <div
+      style={{ touchAction: 'none' }}
+      className="fixed inset-0 select-none overflow-hidden flex flex-col justify-between bg-[#FBF9F5] touch-none"
+    >
       {/* Millisecond Timer Bar */}
       <div className="w-full bg-[#E7E2D9] h-2">
         <div
-          className="bg-[#D9381E] h-full transition-all duration-75 ease-linear"
+          className="bg-[#E07A5F] h-full transition-all duration-75 ease-linear"
           style={{ width: `${timerPercent}%` }}
         />
       </div>
@@ -110,12 +113,12 @@ export const OnlineDuelView: React.FC<OnlineDuelViewProps> = ({
         onTouchStart={handleTouch}
         onPointerDown={handlePointerDown}
         style={{ touchAction: 'none' }}
-        className="flex-1 m-4 rounded-3xl bg-[#D9381E] text-white flex flex-col items-center justify-center active:scale-[0.99] transition-transform cursor-pointer shadow-lg"
+        className="flex-1 m-4 rounded-3xl bg-white border border-[#E7E2D9] text-[#1C1917] flex flex-col items-center justify-center active:scale-[0.99] transition-transform cursor-pointer shadow-xs"
       >
-        <span className="text-sm uppercase tracking-widest font-bold opacity-80">
-          SERİ DOKUN! 🔥
+        <span className="text-sm uppercase tracking-widest font-semibold text-[#78716C]">
+          Hızlı dokun
         </span>
-        <div className="font-display font-black text-7xl mt-2 tabular-nums">
+        <div className="font-display font-bold text-6xl text-[#1C1917] mt-2 tabular-nums">
           {localTaps}
         </div>
       </div>

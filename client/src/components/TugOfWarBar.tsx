@@ -24,7 +24,7 @@ export const TugOfWarBar: React.FC<TugOfWarBarProps> = ({
   return (
     <div className="w-full space-y-1 select-none">
       <div className="flex justify-between items-center text-xs font-bold px-1">
-        <span className="text-[#D9381E] truncate max-w-[120px]">
+        <span className="text-[#E07A5F] truncate max-w-[120px]">
           {label1} ({score1})
         </span>
         <span className="text-[#2D6A4F] truncate max-w-[120px]">
@@ -32,9 +32,9 @@ export const TugOfWarBar: React.FC<TugOfWarBarProps> = ({
         </span>
       </div>
 
-      <div className="w-full h-3 bg-[#1C1917] rounded-full overflow-hidden flex border border-[#3E3835]">
+      <div className="w-full h-3 bg-[#E7E2D9] rounded-full overflow-hidden flex border border-[#D5CEC5]">
         <div
-          className="bg-[#D9381E] h-full"
+          className="bg-[#E07A5F] h-full"
           style={{
             width: `${p1Percent}%`,
             transition: 'width 120ms cubic-bezier(0.34, 1.56, 0.64, 1)',
