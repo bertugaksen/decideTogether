@@ -160,8 +160,22 @@ export function categorizeVenue(venue: Venue): string {
 export function balanceDeckDiversity(venues: Venue[], targetCount = 15): Venue[] {
   if (venues.length <= 1) return venues;
 
-  // Filter out non-food venues (e.g. concert hall, department store)
-  const nonFoodKeywords = ['concert hall', 'department store', 'clothing store', 'gas station', 'supermarket', 'mall'];
+  // Filter out non-food venues (e.g. concert hall, department store, hotel)
+  const nonFoodKeywords = [
+    'concert hall',
+    'department store',
+    'clothing store',
+    'gas station',
+    'supermarket',
+    'mall',
+    'hotel',
+    'motel',
+    'lodging',
+    'association',
+    'organization',
+    'guest house',
+    'resort',
+  ];
   const foodVenues = venues.filter((v) => {
     const cat = (v.category || '').toLowerCase();
     return !nonFoodKeywords.some((kw) => cat.includes(kw));
