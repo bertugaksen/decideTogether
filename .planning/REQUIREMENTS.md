@@ -47,9 +47,9 @@
 
 ### Warm Editorial Minimal & Anti-AI-Slop (EDIT)
 
-- [ ] **EDIT-01**: Fraunces serif Google Font loaded and integrated into Tailwind CSS v4 `@theme` (`--font-display`), replacing generic startup sans for headings and venue cards.
+- [x] **EDIT-01**: Fraunces serif Google Font loaded and integrated into Tailwind CSS v4 `@theme` (`--font-display`), replacing generic startup sans for headings and venue cards.
 - [ ] **EDIT-02**: All 5 "Bu akşam" time-of-day assumptions neutralized into timeless editorial Turkish across Lobby, title, and celebration surfaces.
-- [ ] **EDIT-03**: All 19 juvenile emojis and redundant icon+emoji pairings purged; like/pass stamps replaced with clean typographic uppercase ink stamps (`BEĞENDİM` / `PAS`) and dead sponsor relics removed.
+- [x] **EDIT-03**: All 19 juvenile emojis and redundant icon+emoji pairings purged; like/pass stamps replaced with clean typographic uppercase ink stamps (`BEĞENDİM` / `PAS`) and dead sponsor relics removed.
 - [ ] **EDIT-04**: `MatchCelebration` modal streamlined to 1 primary Hero CTA ("Yol Tarifi Al") + 2x2 secondary pill row with 1px `#E7E2D9` borders, purging neon buttons (`#EA004B`, `#06C167`) and double confetti cannons in favor of a warm single-burst palette.
 - [ ] **EDIT-05**: Framer Motion physics calibrated to `rotate = x * 0.05`, spring snap-back `stiffness: 300, damping: 20`, tactile tap `active:scale-[0.98]`, and match climax scale-up `1.05`.
 - [ ] **EDIT-06**: Duel views and countdown surfaces neutralized: dark cyber backdrops and Paprika red floods replaced with Warm Linen and Crisp White surfaces, and screaming arcade microcopy replaced with calm labels.
@@ -80,9 +80,9 @@
 | MOB-02 | Phase 6 | Complete |
 | MOB-03 | Phase 6 | Complete |
 | MOB-04 | Phase 6 | Complete |
-| EDIT-01 | Phase 7 | Planned |
-| EDIT-02 | Phase 7 | Planned |
-| EDIT-03 | Phase 7 | Planned |
+| EDIT-01 | Phase 7 | Complete |
+| EDIT-02 | Phase 7 | In Progress |
+| EDIT-03 | Phase 7 | Complete |
 | EDIT-04 | Phase 7 | Planned |
 | EDIT-05 | Phase 7 | Planned |
 | EDIT-06 | Phase 7 | Planned |
