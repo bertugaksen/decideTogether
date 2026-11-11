@@ -10,6 +10,7 @@
     "test": "tsx --test src/tests/*.test.ts"
   },
   "dependencies": {
+    "@decidetogether/shared": "*",
     "cors": "^2.8.5",
     "express": "^4.21.2",
     "lru-cache": "^11.0.0",
