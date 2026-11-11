@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 
 export interface GpsCoordinates {
   lat: number;
@@ -9,6 +9,14 @@ export function useGeolocation(onLocationResolved?: (coords: GpsCoordinates) => 
   const [isLoading, setIsLoading] = useState(false);
   const [geoError, setGeoError] = useState<string | null>(null);
   const [coords, setCoords] = useState<GpsCoordinates | null>(null);
+  const isMountedRef = useRef(true);
+
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
 
   const requestGps = useCallback(
     (customCallback?: (coords: GpsCoordinates) => void) => {
@@ -22,6 +30,7 @@ export function useGeolocation(onLocationResolved?: (coords: GpsCoordinates) => 
 
       navigator.geolocation.getCurrentPosition(
         (position) => {
+          if (!isMountedRef.current) return;
           setIsLoading(false);
           const resolved: GpsCoordinates = {
             lat: position.coords.latitude,
@@ -36,6 +45,7 @@ export function useGeolocation(onLocationResolved?: (coords: GpsCoordinates) => 
           }
         },
         (error) => {
+          if (!isMountedRef.current) return;
           setIsLoading(false);
           switch (error.code) {
             case error.PERMISSION_DENIED:
