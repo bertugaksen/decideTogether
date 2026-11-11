@@ -2,6 +2,7 @@ import { WebSocket } from 'ws';
 import { Room, Participant, ServerMessage, Venue } from './types.js';
 import { VenueService, isValidCoordinate } from './services/venueService.js';
 import { MOCK_DISTRICTS } from './services/mockVenues.js';
+import { duelEngine } from './services/duelEngine.js';
 
 const FOOD_NICKNAMES = [
   'Aç Panda',
@@ -532,7 +533,7 @@ export class RoomManager {
     return this.clients.get(ws);
   }
 
-  // Start 5-second Rapid Tapper Duel (DUEL-01)
+  // Start 5-second Rapid Tapper Duel (DUEL-01) - delegated to DuelEngine
   public startDuel(ws: WebSocket, mode: 'online' | 'split' = 'online'): boolean {
     const client = this.clients.get(ws);
     if (!client) return false;
@@ -545,23 +546,9 @@ export class RoomManager {
       clearTimeout(room.duelState.timer);
     }
 
-    const countdownMs = 3000;
-    const durationMs = 5000;
-    const startTime = Date.now() + countdownMs;
     const participantIds = Object.keys(room.participants);
-
-    const initialScores: Record<string, number> = {};
-    for (const id of participantIds) {
-      initialScores[id] = 0;
-    }
-
-    room.duelState = {
-      status: 'countdown',
-      mode,
-      startTime,
-      durationMs,
-      scores: initialScores,
-    };
+    const { duelState, startTime, durationMs, totalWaitMs } = duelEngine.initializeDuel(mode, participantIds);
+    room.duelState = duelState;
 
     this.broadcastToRoom(room.code, {
       type: 'DUEL_STARTING',
@@ -570,10 +557,9 @@ export class RoomManager {
       mode,
     });
 
-    const totalWait = countdownMs + durationMs + 350;
     room.duelState.timer = setTimeout(() => {
       this.concludeDuel(room.code);
-    }, totalWait);
+    }, totalWaitMs);
 
     return true;
   }
@@ -586,20 +572,10 @@ export class RoomManager {
     const room = this.rooms.get(client.roomCode);
     if (!room || !room.duelState || room.duelState.status === 'finished') return;
 
-    const now = Date.now();
-    // Timing boundary: taps only valid between startTime and (startTime + durationMs + 400ms grace)
-    if (now < room.duelState.startTime || now > room.duelState.startTime + room.duelState.durationMs + 400) {
-      return;
-    }
+    const result = duelEngine.validateTap(room.duelState, client.userId, cumulativeTaps);
+    if (!result.valid) return;
 
-    const currentScore = room.duelState.scores[client.userId] || 0;
-    // Anti-cheat clamp: maximum increase of 30 taps per incoming batched packet (T-04-02)
-    let validatedTaps = cumulativeTaps;
-    if (validatedTaps - currentScore > 30) {
-      validatedTaps = currentScore + 30;
-    }
-
-    room.duelState.scores[client.userId] = Math.max(currentScore, validatedTaps);
+    room.duelState.scores[client.userId] = result.newScore;
 
     this.broadcastToRoom(room.code, {
       type: 'DUEL_PROGRESS',
@@ -618,31 +594,8 @@ export class RoomManager {
     }
     room.duelState.status = 'finished';
 
-    const scores = room.duelState.scores;
     const userIds = Object.keys(room.participants);
-    let winnerId = forcedWinnerId;
-    let tieBroken = false;
-
-    if (!winnerId) {
-      if (userIds.length >= 2) {
-        const u1 = userIds[0];
-        const u2 = userIds[1];
-        const s1 = scores[u1] || 0;
-        const s2 = scores[u2] || 0;
-
-        if (s1 > s2) {
-          winnerId = u1;
-        } else if (s2 > s1) {
-          winnerId = u2;
-        } else {
-          // Exact tie: fair random coin toss (DUEL-04)
-          winnerId = Math.random() < 0.5 ? u1 : u2;
-          tieBroken = true;
-        }
-      } else if (userIds.length === 1) {
-        winnerId = userIds[0];
-      }
-    }
+    const { winnerId, tieBroken } = duelEngine.determineWinner(room.duelState.scores, userIds, forcedWinnerId);
 
     if (!winnerId) return;
 
@@ -671,33 +624,11 @@ export class RoomManager {
     const room = this.rooms.get(roomCode);
     if (!room || !room.venues || room.venues.length === 0) return undefined;
 
-    // 1. Winner's likes in room.votes (sorted by rating descending)
-    const winnerVotes = room.votes?.[winnerId] || {};
-    const likedVenueIds = Object.keys(winnerVotes).filter((vid) => winnerVotes[vid] === 'like');
-
-    if (likedVenueIds.length > 0) {
-      const likedVenues = room.venues.filter((v) => likedVenueIds.includes(v.id));
-      if (likedVenues.length > 0) {
-        likedVenues.sort((a, b) => b.rating - a.rating);
-        return likedVenues[0];
-      }
-    }
-
-    // 2. Winner passed on all: fallback to peer's likes
-    const peerId = Object.keys(room.participants).find((id) => id !== winnerId);
-    if (peerId) {
-      const peerVotes = room.votes?.[peerId] || {};
-      const peerLikedIds = Object.keys(peerVotes).filter((vid) => peerVotes[vid] === 'like');
-      if (peerLikedIds.length > 0) {
-        const peerLikedVenues = room.venues.filter((v) => peerLikedIds.includes(v.id));
-        if (peerLikedVenues.length > 0) {
-          peerLikedVenues.sort((a, b) => b.rating - a.rating);
-          return peerLikedVenues[0];
-        }
-      }
-    }
-
-    // 3. Both passed on all: fallback to top deck venue
-    return room.venues[0];
+    return duelEngine.resolveWinningVenue(
+      room.venues,
+      room.votes || {},
+      winnerId,
+      Object.keys(room.participants)
+    );
   }
 }
