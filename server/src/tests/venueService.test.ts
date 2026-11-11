@@ -5,6 +5,8 @@ import {
   isValidCoordinate,
   findNearestDistrict,
   mapPriceLevel,
+  categorizeVenue,
+  balanceDeckDiversity,
 } from '../services/venueService.js';
 import { MOCK_DISTRICTS, MOCK_VENUES } from '../services/mockVenues.js';
 
@@ -103,3 +105,25 @@ test('VenueService - caches results in-memory avoiding recalculation', async () 
   // Exact same array reference returned from in-memory cache
   assert.strictEqual(deck1, deck2);
 });
+
+test('balanceDeckDiversity - alternates culinary categories and eliminates consecutive same-type cards', () => {
+  const clusteredVenues = [
+    { id: '1', name: 'Kebapçı Hasan', category: 'Kebab Shop', rating: 4.8, reviewCount: 100, priceLevel: 2 as const, address: 'X', location: { lat: 0, lng: 0 }, photoUrl: 'x' },
+    { id: '2', name: 'Ciğerci Mehmet', category: 'Kebab Shop', rating: 4.7, reviewCount: 100, priceLevel: 2 as const, address: 'X', location: { lat: 0, lng: 0 }, photoUrl: 'x' },
+    { id: '3', name: 'Burger Lab', category: 'Fast Food Restaurant', rating: 4.6, reviewCount: 100, priceLevel: 2 as const, address: 'X', location: { lat: 0, lng: 0 }, photoUrl: 'x' },
+    { id: '4', name: 'Zırh Kebap', category: 'Kebab Shop', rating: 4.5, reviewCount: 100, priceLevel: 2 as const, address: 'X', location: { lat: 0, lng: 0 }, photoUrl: 'x' },
+    { id: '5', name: 'Moda Pizza', category: 'Italian Restaurant', rating: 4.7, reviewCount: 100, priceLevel: 2 as const, address: 'X', location: { lat: 0, lng: 0 }, photoUrl: 'x' },
+    { id: '6', name: 'Asuman Çikolata', category: 'Chocolate Shop', rating: 4.9, reviewCount: 100, priceLevel: 2 as const, address: 'X', location: { lat: 0, lng: 0 }, photoUrl: 'x' },
+    { id: '7', name: 'Çiya Sofrası', category: 'Turkish Restaurant', rating: 4.6, reviewCount: 100, priceLevel: 2 as const, address: 'X', location: { lat: 0, lng: 0 }, photoUrl: 'x' },
+    { id: '8', name: 'McDonalds', category: 'Fast Food Restaurant', rating: 4.0, reviewCount: 100, priceLevel: 2 as const, address: 'X', location: { lat: 0, lng: 0 }, photoUrl: 'x' },
+  ];
+
+  const balanced = balanceDeckDiversity(clusteredVenues, 8);
+  assert.strictEqual(balanced.length, 8);
+
+  // Check that the first two items do NOT have the same category
+  const cat0 = categorizeVenue(balanced[0]);
+  const cat1 = categorizeVenue(balanced[1]);
+  assert.notStrictEqual(cat0, cat1, 'First two cards must have distinct culinary categories');
+});
+

@@ -45,6 +45,174 @@ export function mapPriceLevel(level?: string): 1 | 2 | 3 | 4 {
 }
 
 /**
+ * Translates English primary place types to friendly Turkish category labels.
+ */
+export function formatCategoryName(rawType?: string): string {
+  if (!rawType) return 'Restoran & Cafe';
+  const typeLower = rawType.toLowerCase().trim();
+
+  const typeMap: Record<string, string> = {
+    'kebab shop': 'Kebap & Izgara',
+    'turkish restaurant': 'Türk Mutfağı & Ev Yemekleri',
+    'fast food restaurant': 'Fast Food & Burger',
+    'chicken restaurant': 'Tavuk & Sokak Lezzeti',
+    'breakfast restaurant': 'Kahvaltı & Brunch',
+    'coffee shop': 'Kahve & Kafe',
+    'cafe': 'Kafe & Bistro',
+    'pastry shop': 'Pastane & Tatlı',
+    'bakery': 'Fırın & Hamur İşi',
+    'chocolate shop': 'Çikolata & Tatlı',
+    'italian restaurant': 'İtalyan & Pizza',
+    'pizza restaurant': 'Pizza & Makarna',
+    'seafood restaurant': 'Deniz Ürünleri & Balık',
+    'steak house': 'Et & Steakhouse',
+    'hamburger restaurant': 'Gurme Burger',
+    'restaurant': 'Restoran & Lezzet Durağı',
+  };
+
+  return typeMap[typeLower] || rawType;
+}
+
+/**
+ * Classifies a venue into a broad culinary category for deck diversity interleaving.
+ */
+export function categorizeVenue(venue: Venue): string {
+  const cat = (venue.category || '').toLowerCase();
+  const name = (venue.name || '').toLowerCase();
+  const text = `${cat} ${name}`;
+
+  if (
+    text.includes('kebab') ||
+    text.includes('kebap') ||
+    text.includes('ciğer') ||
+    text.includes('döner') ||
+    text.includes('ocakbaşı') ||
+    text.includes('köfte') ||
+    text.includes('steak')
+  ) {
+    return 'kebap_et';
+  }
+
+  if (
+    text.includes('burger') ||
+    text.includes('fast food') ||
+    text.includes('chicken') ||
+    text.includes('tavuk') ||
+    text.includes('sandviç') ||
+    text.includes('büfe') ||
+    text.includes('tost')
+  ) {
+    return 'burger_fast';
+  }
+
+  if (
+    text.includes('pizza') ||
+    text.includes('makarna') ||
+    text.includes('pasta') ||
+    text.includes('italy') ||
+    text.includes('ital') ||
+    text.includes('say cheese')
+  ) {
+    return 'pizza_italyan';
+  }
+
+  if (
+    text.includes('tatlı') ||
+    text.includes('pastane') ||
+    text.includes('kahve') ||
+    text.includes('coffee') ||
+    text.includes('cafe') ||
+    text.includes('kafe') ||
+    text.includes('chocolate') ||
+    text.includes('çikolata') ||
+    text.includes('bakery') ||
+    text.includes('fırın') ||
+    text.includes('breakfast') ||
+    text.includes('kahvaltı') ||
+    text.includes('brekkie') ||
+    text.includes('nata')
+  ) {
+    return 'cafe_tatli';
+  }
+
+  if (
+    text.includes('türk') ||
+    text.includes('ev yemeği') ||
+    text.includes('lokanta') ||
+    text.includes('çorba') ||
+    text.includes('pide') ||
+    text.includes('lahmacun') ||
+    text.includes('sofra') ||
+    text.includes('sokak') ||
+    text.includes('şırdan') ||
+    text.includes('kokoreç')
+  ) {
+    return 'geleneksel_ev';
+  }
+
+  return 'dunya_diger';
+}
+
+/**
+ * Interleaves venues across culinary categories so users never see the same cuisine
+ * twice in a row (e.g. Burger -> Kebap -> Pizza -> Ev Yemeği -> Tatlı).
+ */
+export function balanceDeckDiversity(venues: Venue[], targetCount = 15): Venue[] {
+  if (venues.length <= 1) return venues;
+
+  // Filter out non-food venues (e.g. concert hall, department store)
+  const nonFoodKeywords = ['concert hall', 'department store', 'clothing store', 'gas station', 'supermarket', 'mall'];
+  const foodVenues = venues.filter((v) => {
+    const cat = (v.category || '').toLowerCase();
+    return !nonFoodKeywords.some((kw) => cat.includes(kw));
+  });
+
+  const pool = foodVenues.length >= 8 ? foodVenues : venues;
+
+  // Group by category buckets
+  const buckets: Record<string, Venue[]> = {};
+  for (const v of pool) {
+    const key = categorizeVenue(v);
+    if (!buckets[key]) buckets[key] = [];
+    buckets[key].push(v);
+  }
+
+  const bucketKeys = Object.keys(buckets);
+  const result: Venue[] = [];
+  let remaining = true;
+  let lastBucket = '';
+
+  while (result.length < targetCount && remaining) {
+    remaining = false;
+    for (const key of bucketKeys) {
+      if (result.length >= targetCount) break;
+      if (buckets[key].length > 0) {
+        // Skip same category back-to-back if another category has items
+        const otherAvailable = bucketKeys.some((k) => k !== key && buckets[k].length > 0);
+        if (key === lastBucket && otherAvailable) {
+          continue;
+        }
+        const venue = buckets[key].shift()!;
+        result.push(venue);
+        lastBucket = key;
+        remaining = true;
+      }
+    }
+  }
+
+  // If target count not yet reached, drain any remaining venues
+  if (result.length < targetCount) {
+    for (const key of bucketKeys) {
+      while (buckets[key].length > 0 && result.length < targetCount) {
+        result.push(buckets[key].shift()!);
+      }
+    }
+  }
+
+  return result;
+}
+
+/**
  * Calculates nearest district from coordinates based on Euclidean distance.
  */
 export function findNearestDistrict(lat: number, lng: number): District {
@@ -186,7 +354,7 @@ export async function fetchGooglePlacesNearby(
       },
       body: JSON.stringify({
         includedTypes: ['restaurant', 'cafe', 'fast_food_restaurant', 'bakery'],
-        maxResultCount: 15,
+        maxResultCount: 20,
         rankPreference: 'POPULARITY',
         locationRestriction: {
           circle: {
@@ -222,7 +390,7 @@ export async function fetchGooglePlacesNearby(
       const baseVenue: Venue = {
         id: `gplace_${p.id}`,
         name: p.displayName?.text || 'Bilinmeyen Restoran',
-        category: p.primaryTypeDisplayName?.text || 'Restoran & Cafe',
+        category: formatCategoryName(p.primaryTypeDisplayName?.text),
         rating: typeof p.rating === 'number' ? p.rating : 4.5,
         reviewCount: typeof p.userRatingCount === 'number' ? p.userRatingCount : 100,
         priceLevel: mapPriceLevel(p.priceLevel),
@@ -281,7 +449,8 @@ export class VenueService {
     }
 
     const regionalSponsors = selectRegionalSponsors(district.id, SPONSORED_CANDIDATES);
-    const rawDeck = injectSponsoredVenues(organicVenues, regionalSponsors);
+    const diverseOrganic = balanceDeckDiversity(organicVenues, 15);
+    const rawDeck = injectSponsoredVenues(diverseOrganic, regionalSponsors);
     const deck = rawDeck.map((v) => enrichVenueActions(v, district.center));
 
     this.cache.set(cacheKey, deck);
@@ -319,7 +488,8 @@ export class VenueService {
       }
 
       const regionalSponsors = selectRegionalSponsors(nearest.id, SPONSORED_CANDIDATES);
-      const rawDeck = injectSponsoredVenues(organic, regionalSponsors);
+      const diverseOrganic = balanceDeckDiversity(organic, 15);
+      const rawDeck = injectSponsoredVenues(diverseOrganic, regionalSponsors);
       const deck = rawDeck.map((v) => enrichVenueActions(v, coords));
 
       this.cache.set(geoKey, deck);
