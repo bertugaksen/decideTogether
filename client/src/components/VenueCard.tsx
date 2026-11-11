@@ -52,7 +52,7 @@ export const VenueCard: React.FC<VenueCardProps> = ({
     // Underneath background preview card (static, slightly scaled for depth)
     return (
       <div
-        className="absolute inset-0 rounded-3xl bg-white border border-[#E7E2D9] shadow-md overflow-hidden pointer-events-none transition-all duration-200"
+        className="absolute inset-0 rounded-3xl bg-white border border-[#E7E2D9] shadow-2xs overflow-hidden pointer-events-none transition-all duration-200"
         style={{ transform: 'scale(0.96) translateY(12px)', opacity: 0.85 }}
       >
         <img
@@ -90,7 +90,7 @@ export const VenueCard: React.FC<VenueCardProps> = ({
 
   return (
     <motion.div
-      className="absolute inset-0 rounded-3xl bg-white border border-[#E7E2D9] shadow-xl overflow-hidden cursor-grab active:cursor-grabbing touch-none select-none z-10"
+      className="absolute inset-0 rounded-3xl bg-white border border-[#E7E2D9] shadow-xs overflow-hidden cursor-grab active:cursor-grabbing touch-none select-none z-10"
       style={{ x, rotate }}
       drag="x"
       dragConstraints={{ left: 0, right: 0 }}
@@ -106,17 +106,17 @@ export const VenueCard: React.FC<VenueCardProps> = ({
       {/* LIKE STAMP (Basil Green #2D6A4F) */}
       <motion.div
         style={{ opacity: likeOpacity }}
-        className="absolute top-6 left-6 z-20 border-4 border-[#2D6A4F] text-[#2D6A4F] font-display font-black text-2xl px-4 py-1.5 rounded-2xl -rotate-12 bg-white/95 shadow-lg pointer-events-none"
+        className="absolute top-6 left-6 z-20 border-2 border-[#2D6A4F] text-[#2D6A4F] font-bold tracking-widest text-xl px-4 py-1.5 rounded-xl -rotate-12 bg-white/95 pointer-events-none"
       >
-        BEĞENDİM ❤️
+        BEĞENDİM
       </motion.div>
 
       {/* PASS STAMP (Paprika Red #D9381E) */}
       <motion.div
         style={{ opacity: passOpacity }}
-        className="absolute top-6 right-6 z-20 border-4 border-[#D9381E] text-[#D9381E] font-display font-black text-2xl px-4 py-1.5 rounded-2xl rotate-12 bg-white/95 shadow-lg pointer-events-none"
+        className="absolute top-6 right-6 z-20 border-2 border-[#D9381E] text-[#D9381E] font-bold tracking-widest text-xl px-4 py-1.5 rounded-xl rotate-12 bg-white/95 pointer-events-none"
       >
-        PAS ❌
+        PAS
       </motion.div>
 
       {/* Venue Photo */}
@@ -147,7 +147,7 @@ export const VenueCard: React.FC<VenueCardProps> = ({
               <span className="text-[#78716C] font-normal">({venue.reviewCount})</span>
             </div>
           </div>
-          <h3 className="font-display font-bold text-2xl text-[#1C1917] mt-1 leading-snug line-clamp-1">
+          <h3 className="font-display font-bold text-2xl text-[#1C1917] mt-1.5 leading-snug tracking-tight line-clamp-1">
             {venue.name}
           </h3>
           <div className="flex items-start gap-1 mt-1 text-xs text-[#78716C]">
