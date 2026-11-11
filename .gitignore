@@ -9,3 +9,4 @@ shared/dist/
 .env
 *.env
 *.env.*
+*api*key*
