@@ -10,6 +10,7 @@ export interface OnlineDuelViewProps {
   onSendTapBatch: (cumulativeTaps: number) => void;
   onDuelFinish: () => void;
   durationMs?: number; // 5000ms default
+  startTime?: number; // Server-provided duel start epoch timestamp
 }
 
 export const OnlineDuelView: React.FC<OnlineDuelViewProps> = ({
@@ -19,6 +20,7 @@ export const OnlineDuelView: React.FC<OnlineDuelViewProps> = ({
   onSendTapBatch,
   onDuelFinish,
   durationMs = 5000,
+  startTime,
 }) => {
   const [localTaps, setLocalTaps] = useState(0);
   const [timeLeftMs, setTimeLeftMs] = useState(durationMs);
@@ -59,11 +61,11 @@ export const OnlineDuelView: React.FC<OnlineDuelViewProps> = ({
     return () => clearInterval(batchTimer);
   }, [onSendTapBatch]);
 
-  // 3. 60fps Millisecond timer countdown
+  // 3. 60fps Millisecond timer countdown synchronized with duel startTime
   useEffect(() => {
-    const startTime = Date.now();
+    const duelStart = startTime && startTime <= Date.now() ? startTime : Date.now();
     const timer = setInterval(() => {
-      const elapsed = Date.now() - startTime;
+      const elapsed = Date.now() - duelStart;
       const remaining = Math.max(0, durationMs - elapsed);
       setTimeLeftMs(remaining);
 
@@ -79,7 +81,7 @@ export const OnlineDuelView: React.FC<OnlineDuelViewProps> = ({
     }, 30);
 
     return () => clearInterval(timer);
-  }, [durationMs, onDuelFinish, onSendTapBatch]);
+  }, [durationMs, startTime, onDuelFinish, onSendTapBatch]);
 
   const timerPercent = (timeLeftMs / durationMs) * 100;
 

@@ -13,15 +13,19 @@ export const DuelCountdown: React.FC<DuelCountdownProps> = ({ onComplete }) => {
     soundEffects.initOnUserGesture();
     soundEffects.playCountdownTick();
 
+    let completeTimeout: ReturnType<typeof setTimeout> | null = null;
+
     const interval = setInterval(() => {
       setStep((prev) => {
         if (prev === 1) {
           soundEffects.playStartFanfare();
+          completeTimeout = setTimeout(() => {
+            onComplete();
+          }, 300);
           return 0; // "BAŞLA! 🔥"
         }
-        if (prev === 0) {
+        if (prev <= 0) {
           clearInterval(interval);
-          onComplete();
           return -1;
         }
         soundEffects.playCountdownTick();
@@ -29,7 +33,10 @@ export const DuelCountdown: React.FC<DuelCountdownProps> = ({ onComplete }) => {
       });
     }, 1000);
 
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+      if (completeTimeout) clearTimeout(completeTimeout);
+    };
   }, [onComplete]);
 
   if (step < 0) return null;

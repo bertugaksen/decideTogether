@@ -7,6 +7,7 @@ import { Participant } from '../types.js';
 export interface RapidTapperDuelProps {
   mode: 'online' | 'split';
   durationMs?: number;
+  startTime?: number;
   currentUser: Participant;
   peer: Participant | null;
   opponentScore?: number;
@@ -18,6 +19,7 @@ export interface RapidTapperDuelProps {
 export const RapidTapperDuel: React.FC<RapidTapperDuelProps> = ({
   mode,
   durationMs = 5000,
+  startTime,
   currentUser,
   peer,
   opponentScore = 0,
@@ -39,6 +41,7 @@ export const RapidTapperDuel: React.FC<RapidTapperDuelProps> = ({
           peer={peer}
           opponentScore={opponentScore}
           durationMs={durationMs}
+          startTime={startTime}
           onSendTapBatch={onSendTapBatch}
           onDuelFinish={onOnlineFinish}
         />

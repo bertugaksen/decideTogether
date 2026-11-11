@@ -79,6 +79,7 @@ export const SwipeDeck: React.FC<SwipeDeckProps> = ({
       <RapidTapperDuel
         mode={duelState.mode}
         durationMs={duelState.durationMs}
+        startTime={duelState.startTime}
         currentUser={currentUser}
         peer={peer}
         opponentScore={opponentScore}
