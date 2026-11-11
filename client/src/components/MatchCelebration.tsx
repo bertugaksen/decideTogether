@@ -3,7 +3,7 @@ import confetti from 'canvas-confetti';
 import {
   Star,
   MapPin,
-  Sparkles,
+  Check,
   Navigation,
   Share2,
   Phone,
@@ -30,31 +30,13 @@ export function triggerCelebrationEffects() {
     }
   }
 
-  // 1. Center burst
   confetti({
-    particleCount: 80,
+    particleCount: 70,
     spread: 60,
     origin: { y: 0.6 },
-    colors: ['#D9381E', '#2D6A4F', '#E07A5F', '#FBF9F5'],
+    colors: ['#E07A5F', '#D4AF37', '#2D6A4F', '#FBF9F5'],
+    disableForReducedMotion: true,
   });
-
-  // 2. Left and Right Cannons
-  setTimeout(() => {
-    confetti({
-      particleCount: 50,
-      angle: 60,
-      spread: 55,
-      origin: { x: 0, y: 0.65 },
-      colors: ['#D9381E', '#2D6A4F', '#E07A5F'],
-    });
-    confetti({
-      particleCount: 50,
-      angle: 120,
-      spread: 55,
-      origin: { x: 1, y: 0.65 },
-      colors: ['#D9381E', '#2D6A4F', '#E07A5F'],
-    });
-  }, 200);
 }
 
 export interface MatchCelebrationProps {
@@ -107,7 +89,7 @@ export const MatchCelebration: React.FC<MatchCelebrationProps> = ({
 
   const handleShareResult = () => {
     const text = encodeURIComponent(
-      `🎉 Karar verildi! Bu akşam ${venue.name} (${venue.address}) gidiyoruz! 🍕\n🧭 Yol tarifi: ${navigationUrl}`
+      `Ortak kararımız belli oldu: ${venue.name} (${venue.address}).\n\nYol tarifi: ${navigationUrl}`
     );
     window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank', 'noopener,noreferrer');
   };
@@ -119,30 +101,30 @@ export const MatchCelebration: React.FC<MatchCelebrationProps> = ({
       aria-labelledby="match-celebration-title"
       className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-300"
     >
-      <div className="relative w-full max-w-sm bg-[#FBF9F5] rounded-3xl border border-[#E7E2D9] p-5 shadow-2xl space-y-3.5 text-center my-auto">
+      <div className="relative w-full max-w-sm bg-[#FBF9F5] rounded-3xl border border-[#E7E2D9] p-5 shadow-sm space-y-3.5 text-center my-auto">
         {/* Celebration Header */}
         <div>
-          <div className="w-12 h-12 mx-auto rounded-2xl bg-[#E8F5E9] text-[#2D6A4F] flex items-center justify-center text-2xl shadow-xs">
-            🎉
+          <div className="w-12 h-12 mx-auto rounded-2xl bg-[#E8F5E9] flex items-center justify-center shadow-xs">
+            <Check className="w-6 h-6 text-[#2D6A4F]" />
           </div>
           {duelResult?.tieBroken ? (
             <span className="inline-block mt-2.5 text-[11px] font-bold uppercase tracking-wider text-[#E07A5F] bg-[#FFF3E0] px-3 py-1 rounded-full">
-              TAM BERABERLİK! YAZI-TURA KAZANANI: {duelResult.winnerNickname}
+              Kura sonucu: {duelResult.winnerNickname}
             </span>
           ) : duelResult?.winnerNickname ? (
             <span className="inline-block mt-2.5 text-[11px] font-bold uppercase tracking-wider text-[#2D6A4F] bg-[#E8F5E9] px-3 py-1 rounded-full">
-              🏆 DÜELLO KAZANANI: {duelResult.winnerNickname}
+              Düello kazananı: {duelResult.winnerNickname}
             </span>
           ) : (
-            <span className="inline-block mt-2.5 text-[11px] font-bold uppercase tracking-wider text-[#D9381E] bg-[#FDF2F0] px-3 py-1 rounded-full">
-              ORTAK KARAR BULUNDU!
+            <span className="inline-block mt-2.5 text-[11px] font-bold uppercase tracking-wider text-[#2D6A4F] bg-[#E8F5E9] px-3 py-1 rounded-full">
+              Ortak karar
             </span>
           )}
           <h2
             id="match-celebration-title"
-            className="font-display font-black text-2xl text-[#1C1917] mt-1"
+            className="font-display font-semibold text-2xl text-[#1C1917] mt-1"
           >
-            Bu akşam buradayız!
+            Karar verildi: Buradayız.
           </h2>
         </div>
 
@@ -159,12 +141,6 @@ export const MatchCelebration: React.FC<MatchCelebrationProps> = ({
                 img.src = FALLBACK_IMAGE;
               }}
             />
-            {venue.isSponsored && (
-              <div className="absolute top-3 left-3 bg-[#D9381E] text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full flex items-center gap-1 shadow-sm">
-                <Sparkles className="w-3 h-3" />
-                <span>{venue.sponsorBadge || 'Sponsorlu'}</span>
-              </div>
-            )}
             {computedDistanceKm !== undefined && (
               <div className="absolute bottom-2.5 right-2.5 bg-[#1C1917]/80 backdrop-blur-xs text-white text-[10px] font-semibold px-2 py-0.5 rounded-full">
                 ~{computedDistanceKm} km
@@ -174,7 +150,7 @@ export const MatchCelebration: React.FC<MatchCelebrationProps> = ({
 
           <div className="p-4">
             <div className="flex items-center justify-between gap-2">
-              <span className="text-xs font-semibold text-[#D9381E] uppercase truncate">
+              <span className="text-xs font-semibold text-[#E07A5F] uppercase truncate">
                 {venue.category}
               </span>
               <div className="flex items-center gap-1 bg-[#F5F0EB] px-2 py-0.5 rounded-lg text-xs font-bold text-[#1C1917] shrink-0">
@@ -210,61 +186,58 @@ export const MatchCelebration: React.FC<MatchCelebrationProps> = ({
             href={navigationUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="w-full flex items-center justify-center gap-2 py-3.5 px-4 rounded-xl bg-[#D9381E] hover:bg-[#BF2F18] text-white font-semibold text-sm transition-colors shadow-xs active:translate-y-px cursor-pointer"
+            className="w-full flex items-center justify-center gap-2 py-3.5 px-4 rounded-xl bg-[#2D6A4F] hover:bg-[#24543F] text-white font-medium text-sm transition-all shadow-xs active:scale-[0.98] cursor-pointer"
           >
             <Navigation className="w-4 h-4" />
-            <span>🧭 Yol Tarifi Al (Google Haritalar)</span>
+            <span>Yol Tarifi Al (Google Haritalar)</span>
           </a>
 
-          {/* Direct Delivery Platform Row: Yemeksepeti & Uber Eats (MOB-04) */}
-          <div className="grid grid-cols-2 gap-2">
+          {/* 2x2 Secondary Action Pills */}
+          <div className="grid grid-cols-2 gap-2 mt-3">
             <a
               href={deliveryLinks.yemeksepetiUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center justify-center gap-1.5 py-3 px-3 rounded-xl bg-[#EA004B] hover:bg-[#D00042] text-white font-bold text-xs transition-colors shadow-2xs active:translate-y-px cursor-pointer"
+              className="bg-white border border-[#E7E2D9] text-[#1C1917] hover:bg-[#FAF7F2] font-medium text-xs py-2.5 px-3 rounded-xl flex items-center justify-center gap-1.5 active:scale-[0.98] transition-all cursor-pointer"
             >
-              <Utensils className="w-3.5 h-3.5 shrink-0" />
-              <span>🛵 Yemeksepeti</span>
+              <Utensils className="w-3.5 h-3.5 text-[#78716C] shrink-0" />
+              <span>Yemeksepeti</span>
             </a>
 
             <a
               href={deliveryLinks.uberEatsUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center justify-center gap-1.5 py-3 px-3 rounded-xl bg-[#06C167] hover:bg-[#05A357] text-white font-bold text-xs transition-colors shadow-2xs active:translate-y-px cursor-pointer"
+              className="bg-white border border-[#E7E2D9] text-[#1C1917] hover:bg-[#FAF7F2] font-medium text-xs py-2.5 px-3 rounded-xl flex items-center justify-center gap-1.5 active:scale-[0.98] transition-all cursor-pointer"
             >
-              <Utensils className="w-3.5 h-3.5 shrink-0" />
-              <span>🍔 Uber Eats</span>
+              <Utensils className="w-3.5 h-3.5 text-[#78716C] shrink-0" />
+              <span>Uber Eats</span>
             </a>
-          </div>
 
-          {/* Tertiary Row: Direct Phone Call & WhatsApp Share */}
-          <div className="grid grid-cols-2 gap-2">
             <button
               type="button"
               onClick={handleCallVenue}
               title={venue.phone ? `Ara: ${venue.phone}` : 'Telefon numarasını bul'}
-              className="flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl bg-white border border-[#E7E2D9] hover:bg-[#FAF7F2] text-[#1C1917] font-semibold text-xs transition-colors active:translate-y-px cursor-pointer"
+              className="bg-white border border-[#E7E2D9] text-[#1C1917] hover:bg-[#FAF7F2] font-medium text-xs py-2.5 px-3 rounded-xl flex items-center justify-center gap-1.5 active:scale-[0.98] transition-all cursor-pointer"
             >
-              <Phone className="w-3.5 h-3.5 text-[#D9381E] shrink-0" />
-              <span className="truncate">{venue.phone ? '📞 Hemen Ara' : '📞 Numara Bul'}</span>
+              <Phone className="w-3.5 h-3.5 text-[#78716C] shrink-0" />
+              <span className="truncate">{venue.phone ? 'Hemen Ara' : 'Numara Bul'}</span>
             </button>
 
             <button
               type="button"
               onClick={handleShareResult}
-              className="flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl bg-white border border-[#E7E2D9] hover:bg-[#FAF7F2] text-[#1C1917] font-semibold text-xs transition-colors active:translate-y-px cursor-pointer"
+              className="bg-white border border-[#E7E2D9] text-[#1C1917] hover:bg-[#FAF7F2] font-medium text-xs py-2.5 px-3 rounded-xl flex items-center justify-center gap-1.5 active:scale-[0.98] transition-all cursor-pointer"
             >
-              <Share2 className="w-3.5 h-3.5 text-[#2D6A4F] shrink-0" />
-              <span className="truncate">💬 WhatsApp</span>
+              <Share2 className="w-3.5 h-3.5 text-[#78716C] shrink-0" />
+              <span className="truncate">WhatsApp Paylaş</span>
             </button>
           </div>
 
           <button
             type="button"
             onClick={onLeave}
-            className="w-full text-center py-2 text-xs text-[#78716C] hover:text-[#D9381E] transition-colors cursor-pointer"
+            className="w-full text-center py-2 text-xs text-[#78716C] hover:text-[#1C1917] transition-colors cursor-pointer"
           >
             Yeni Karar Odası Başlat
           </button>
