@@ -1,0 +1,38 @@
+{
+  "contract": "1.0.0",
+  "flavor": "core",
+  "milestone": null,
+  "phases": [
+    {
+      "number": "1",
+      "name": "Room & Real-Time Connection",
+      "status": "complete"
+    },
+    {
+      "number": "2",
+      "name": "Live Venue Discovery & Hybrid Location",
+      "status": "complete"
+    },
+    {
+      "number": "3",
+      "name": "Gesture Deck & Instant Match Celebration",
+      "status": "complete"
+    },
+    {
+      "number": "4",
+      "name": "Rapid Tapper Tie-Breaker Duel",
+      "status": "pending"
+    },
+    {
+      "number": "5",
+      "name": "Post-Match Navigation & Delivery Actions",
+      "status": "pending"
+    }
+  ],
+  "next": {
+    "command": "/gsd-progress",
+    "label": "Show progress",
+    "reason": "Unsure of state — showing progress"
+  },
+  "updated_at": "2026-11-09T19:48:42.222Z"
+}
