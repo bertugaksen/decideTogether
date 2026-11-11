@@ -12,6 +12,7 @@ DecideTogether, çiftlerin "Ne yesek?" kararsızlığını 10 saniyelik eğlence
 - [x] **Phase 4: Rapid Tapper Tie-Breaker Duel** - Beraberlikte 5 saniyelik adil online/tek-telefon parmak güreşi düellosu.
 - [x] **Phase 5: Post-Match Navigation & Delivery Actions** - Google Maps navigasyon başlatma ve sipariş arama entegrasyonu.
 - [ ] **Phase 6: Mobile UX, Swipe Physics & Location Navigation Polish**
+- [ ] **Phase 7: Warm Editorial Minimal & Anti-AI-Slop Redesign**
 
 ## Phase Details
 
@@ -76,7 +77,7 @@ Plans:
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
+Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
@@ -86,3 +87,15 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 | 4. Rapid Tapper Tie-Breaker Duel | 2/2 | Complete | 2026-11-09 |
 | 5. Post-Match Navigation & Delivery Actions | 2/2 | Complete | 2026-11-11 |
 | 6. Mobile UX, Swipe Physics & Location Navigation Polish | 2/2 | Complete | 2026-11-11 |
+| 7. Warm Editorial Minimal & Anti-AI-Slop Redesign | 0/2 | Ready | — |
+
+### Phase 7: Warm Editorial Minimal & Anti-AI-Slop Redesign
+
+**Goal:** Transform DecideTogether frontend into a world-class Warm Editorial Minimal web application (Kinfolk meets digital product) with Fraunces serif typography, zero juvenile emojis, timeless Turkish copy, calibrated Framer Motion physics (0.05 tilt, 300/20 spring), streamlined post-match hero CTAs, and refined duel surfaces.
+**Requirements:** EDIT-01, EDIT-02, EDIT-03, EDIT-04, EDIT-05, EDIT-06
+**Depends on:** Phase 6
+**Plans:** 2 plans
+
+Plans:
+- [ ] 07-01-PLAN.md — Typography, Content Neutralization & Emoji Purge
+- [ ] 07-02-PLAN.md — Climax Redesign, Framer Motion Physics & Duel Surface Refinement
