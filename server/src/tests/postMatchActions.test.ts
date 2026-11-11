@@ -6,7 +6,7 @@ import {
   buildDeliveryLinks,
   calculateDistanceKm,
 } from '../services/actionLinks.js';
-import { VenueService, selectRegionalSponsors } from '../services/venueService.js';
+import { VenueService } from '../services/venueService.js';
 import { MOCK_DISTRICTS, MOCK_VENUES } from '../services/mockVenues.js';
 import { RoomManager } from '../roomManager.js';
 import { WebSocket } from 'ws';
@@ -22,22 +22,19 @@ function createMockSocket() {
   };
 }
 
-test('buildGoogleMapsNavigationUrl - generates turn-by-turn directions URL with destination and walking mode (ACTION-02)', () => {
-  const url = buildGoogleMapsNavigationUrl(
-    {
-      id: 'gplace_ChIJ123456789',
-      name: 'Aida - Vino e Cucina',
-      address: 'Moda Cad. No:10, Kadıköy',
-      location: { lat: 40.9862, lng: 29.0264 },
-    },
-    { lat: 40.9856, lng: 29.027 }
-  );
+test('buildGoogleMapsNavigationUrl - generates turn-by-turn directions URL with destination, walking mode, and dynamic device GPS origin (ACTION-02, MOB-03)', () => {
+  const url = buildGoogleMapsNavigationUrl({
+    id: 'gplace_ChIJ123456789',
+    name: 'Aida - Vino e Cucina',
+    address: 'Moda Cad. No:10, Kadıköy',
+    location: { lat: 40.9862, lng: 29.0264 },
+  });
 
   assert.ok(url.startsWith('https://www.google.com/maps/dir/?'));
   assert.ok(url.includes('api=1'));
   assert.ok(url.includes('travelmode=walking'));
   assert.ok(url.includes('destination_place_id=ChIJ123456789'));
-  assert.ok(url.includes('origin=40.9856%2C29.027'));
+  assert.strictEqual(url.includes('origin='), false);
 });
 
 test('sanitizePhoneUri - formats valid phone numbers into tel: URIs and rejects unsafe or invalid input (ACTION-03, T-05-01)', () => {
@@ -49,7 +46,7 @@ test('sanitizePhoneUri - formats valid phone numbers into tel: URIs and rejects 
   assert.strictEqual(sanitizePhoneUri(''), null);
 });
 
-test('buildDeliveryLinks - produces encoded search URLs for Yemeksepeti, GetirYemek, and Trendyol Yemek (ACTION-03)', () => {
+test('buildDeliveryLinks - produces universal app links for Yemeksepeti and Uber Eats (ACTION-03, MOB-04)', () => {
   const links = buildDeliveryLinks(
     {
       name: 'Basta! Street Food Bar',
@@ -58,11 +55,11 @@ test('buildDeliveryLinks - produces encoded search URLs for Yemeksepeti, GetirYe
     'Kadıköy, Moda (GPS)'
   );
 
-  assert.ok(links.yemeksepetiUrl.startsWith('https://www.google.com/search?q='));
-  assert.ok(links.yemeksepetiUrl.includes('Yemeksepeti'));
-  assert.ok(links.getirYemekUrl.includes('GetirYemek'));
-  assert.ok(links.trendyolYemekUrl.includes('Trendyol'));
-  assert.ok(links.primaryUrl.startsWith('https://www.google.com/search?q='));
+  assert.ok(links.yemeksepetiUrl.includes('yemeksepeti.com'));
+  assert.ok(links.uberEatsUrl.includes('ubereats.com'));
+  assert.ok(links.getirYemekUrl.includes('getir.com'));
+  assert.ok(links.trendyolYemekUrl.includes('trendyol.com'));
+  assert.ok(links.primaryUrl.startsWith('https://'));
 });
 
 test('calculateDistanceKm - computes realistic Haversine distance in km (ACTION-01)', () => {
@@ -91,16 +88,6 @@ test('MOCK_VENUES & VenueService - all 7 preset districts have 15 enriched venue
   }
 });
 
-test('selectRegionalSponsors - prioritizes matching regional sponsor for Adana, Ankara, and Izmir', () => {
-  const adanaSponsors = selectRegionalSponsors('adana-seyhan');
-  assert.strictEqual(adanaSponsors[0].id, 'spon_adana_01');
-
-  const ankaraSponsors = selectRegionalSponsors('ankara-cankaya');
-  assert.strictEqual(ankaraSponsors[0].id, 'spon_ankara_01');
-
-  const izmirSponsors = selectRegionalSponsors('izmir-alsancak');
-  assert.strictEqual(izmirSponsors[0].id, 'spon_izmir_01');
-});
 
 test('RoomManager.leaveRoom - cleanly removes leaving participant, resets room to waiting, and allows a new peer to join', async () => {
   const manager = new RoomManager();

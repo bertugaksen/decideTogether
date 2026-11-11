@@ -1,6 +1,6 @@
 import { Venue, District, RoomLocation, cleanTurkishVenueName } from '../types.js';
 import { VenueCache, getCoordinateCacheKey } from './venueCache.js';
-import { MOCK_DISTRICTS, MOCK_VENUES, SPONSORED_CANDIDATES } from './mockVenues.js';
+import { MOCK_DISTRICTS, MOCK_VENUES } from './mockVenues.js';
 import {
   buildGoogleMapsNavigationUrl,
   buildDeliveryLinks,
@@ -154,8 +154,8 @@ export function categorizeVenue(venue: Venue): string {
 }
 
 /**
- * Interleaves venues across culinary categories so users never see the same cuisine
- * twice in a row (e.g. Burger -> Kebap -> Pizza -> Ev Yemeği -> Tatlı).
+ * Eliminates consecutive venues of the same category so users never see the same
+ * cuisine/category twice in a row.
  */
 export function balanceDeckDiversity(venues: Venue[], targetCount = 15): Venue[] {
   if (venues.length <= 1) return venues;
@@ -183,10 +183,10 @@ export function balanceDeckDiversity(venues: Venue[], targetCount = 15): Venue[]
 
   const pool = foodVenues.length >= 8 ? foodVenues : venues;
 
-  // Group by category buckets
+  // Group by category label
   const buckets: Record<string, Venue[]> = {};
   for (const v of pool) {
-    const key = categorizeVenue(v);
+    const key = (v.category || 'Mekan').trim().toLowerCase();
     if (!buckets[key]) buckets[key] = [];
     buckets[key].push(v);
   }
@@ -223,7 +223,7 @@ export function balanceDeckDiversity(venues: Venue[], targetCount = 15): Venue[]
     }
   }
 
-  return result;
+  return result.slice(0, targetCount);
 }
 
 /**
@@ -274,62 +274,6 @@ export function enrichVenueActions(
   };
 }
 
-/**
- * Orders sponsored candidates so that a local sponsor matching the district/city
- * is prioritized first when a districtId is provided.
- */
-export function selectRegionalSponsors(
-  districtId?: string,
-  candidates: Venue[] = SPONSORED_CANDIDATES
-): Venue[] {
-  if (!districtId || candidates.length <= 1) return candidates;
-
-  const districtPrefixMap: Record<string, string> = {
-    'kadikoy-moda': 'spon_moda',
-    'kadikoy-caddebostan': 'spon_moda',
-    'besiktas-carsi': 'spon_besiktas',
-    'sisli-nisantasi': 'spon_besiktas',
-    'adana-seyhan': 'spon_adana',
-    'ankara-cankaya': 'spon_ankara',
-    'izmir-alsancak': 'spon_izmir',
-  };
-
-  const preferredPrefix = districtPrefixMap[districtId];
-  if (!preferredPrefix) return candidates;
-
-  const matching = candidates.filter((c) => c.id.startsWith(preferredPrefix));
-  const others = candidates.filter((c) => !c.id.startsWith(preferredPrefix));
-  return [...matching, ...others];
-}
-
-/**
- * Deterministically inserts sponsored cards into top slots (slot 2 / index 1 and slot 3 / index 2)
- * and caps the total deck at 15 venues (VENUE-04).
- */
-export function injectSponsoredVenues(
-  organicVenues: Venue[],
-  sponsoredCandidates: Venue[] = SPONSORED_CANDIDATES
-): Venue[] {
-  if (!sponsoredCandidates || sponsoredCandidates.length === 0) {
-    return organicVenues.slice(0, 15);
-  }
-
-  const result = [...organicVenues];
-  const primary = sponsoredCandidates[0];
-  const secondary = sponsoredCandidates[1];
-
-  if (primary) {
-    // Slot 2 (index 1) - builds trust on first card, ensures 100% swipe exposure on second
-    result.splice(1, 0, primary);
-  }
-
-  if (secondary && result.length >= 3) {
-    // Slot 3 (index 2) - optional secondary sponsor
-    result.splice(2, 0, secondary);
-  }
-
-  return result.slice(0, 15);
-}
 
 /**
  * Fetches nearby venues from Google Places API (New) with strict field masking.
@@ -463,10 +407,8 @@ export class VenueService {
       organicVenues = MOCK_VENUES[districtId] || MOCK_VENUES['kadikoy-moda'];
     }
 
-    const regionalSponsors = selectRegionalSponsors(district.id, SPONSORED_CANDIDATES);
     const diverseOrganic = balanceDeckDiversity(organicVenues, 15);
-    const rawDeck = injectSponsoredVenues(diverseOrganic, regionalSponsors);
-    const deck = rawDeck.map((v) => enrichVenueActions(v, district.center));
+    const deck = diverseOrganic.map((v) => enrichVenueActions(v, district.center));
 
     this.cache.set(cacheKey, deck);
     return deck;
@@ -502,10 +444,8 @@ export class VenueService {
         organic = MOCK_VENUES[nearest.id] || MOCK_VENUES['kadikoy-moda'];
       }
 
-      const regionalSponsors = selectRegionalSponsors(nearest.id, SPONSORED_CANDIDATES);
       const diverseOrganic = balanceDeckDiversity(organic, 15);
-      const rawDeck = injectSponsoredVenues(diverseOrganic, regionalSponsors);
-      const deck = rawDeck.map((v) => enrichVenueActions(v, coords));
+      const deck = diverseOrganic.map((v) => enrichVenueActions(v, coords));
 
       this.cache.set(geoKey, deck);
       return { location, venues: deck };

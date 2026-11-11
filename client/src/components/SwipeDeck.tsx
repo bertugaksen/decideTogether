@@ -46,6 +46,7 @@ export const SwipeDeck: React.FC<SwipeDeckProps> = ({
       : 0;
   const [currentIndex, setCurrentIndex] = useState(savedCardIndex);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [exitDirection, setExitDirection] = useState<'left' | 'right' | null>(null);
 
   useEffect(() => {
     if (savedCardIndex > currentIndex) {
@@ -55,17 +56,19 @@ export const SwipeDeck: React.FC<SwipeDeckProps> = ({
 
   const handleCardSwipe = useCallback(
     (direction: 'like' | 'pass') => {
-      // T-03-06: 250ms transition lock prevents double-swiping
+      // 220ms transition lock prevents double-swiping while keeping fluidity
       if (isTransitioning || currentIndex >= venues.length) return;
       setIsTransitioning(true);
+      setExitDirection(direction === 'like' ? 'right' : 'left');
 
       const currentVenue = venues[currentIndex];
       onSwipe(currentVenue.id, direction, currentIndex, venues.length);
 
       setTimeout(() => {
         setCurrentIndex((prev) => prev + 1);
+        setExitDirection(null);
         setIsTransitioning(false);
-      }, 250);
+      }, 220);
     },
     [currentIndex, isTransitioning, onSwipe, venues]
   );
@@ -178,6 +181,7 @@ export const SwipeDeck: React.FC<SwipeDeckProps> = ({
                 key={currentCard.id}
                 venue={currentCard}
                 isTop={true}
+                exitDirection={exitDirection}
                 onSwipe={handleCardSwipe}
               />
             )}

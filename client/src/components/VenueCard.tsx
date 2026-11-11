@@ -1,19 +1,26 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion, useMotionValue, useTransform } from 'framer-motion';
-import { Star, MapPin, Sparkles } from 'lucide-react';
+import { Star, MapPin } from 'lucide-react';
 import { Venue } from '../types.js';
 
 interface VenueCardProps {
   venue: Venue;
   onSwipe: (direction: 'like' | 'pass') => void;
   isTop: boolean;
+  exitDirection?: 'left' | 'right' | null;
 }
 
 const FALLBACK_IMAGE =
   'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=400&q=80';
 
-export const VenueCard: React.FC<VenueCardProps> = ({ venue, onSwipe, isTop }) => {
+export const VenueCard: React.FC<VenueCardProps> = ({
+  venue,
+  onSwipe,
+  isTop,
+  exitDirection,
+}) => {
   const x = useMotionValue(0);
+  const [internalExitDir, setInternalExitDir] = useState<'left' | 'right' | null>(null);
 
   // Smooth tilt rotation proportional to horizontal drag distance (-18deg to +18deg)
   const rotate = useTransform(x, [-200, 200], [-18, 18]);
@@ -26,15 +33,20 @@ export const VenueCard: React.FC<VenueCardProps> = ({ venue, onSwipe, isTop }) =
     _: any,
     info: { offset: { x: number }; velocity: { x: number } }
   ) => {
-    const SWIPE_THRESHOLD = 100;
-    const VELOCITY_THRESHOLD = 500;
+    const SWIPE_THRESHOLD = 90;
+    const VELOCITY_THRESHOLD = 400;
 
     if (info.offset.x > SWIPE_THRESHOLD || info.velocity.x > VELOCITY_THRESHOLD) {
+      setInternalExitDir('right');
       onSwipe('like');
     } else if (info.offset.x < -SWIPE_THRESHOLD || info.velocity.x < -VELOCITY_THRESHOLD) {
+      setInternalExitDir('left');
       onSwipe('pass');
     }
   };
+
+  const effectiveExitDirection =
+    exitDirection || internalExitDir || (x.get() >= 0 ? 'right' : 'left');
 
   if (!isTop) {
     // Underneath background preview card (static, slightly scaled for depth)
@@ -82,12 +94,13 @@ export const VenueCard: React.FC<VenueCardProps> = ({ venue, onSwipe, isTop }) =
       style={{ x, rotate }}
       drag="x"
       dragConstraints={{ left: 0, right: 0 }}
-      dragElastic={0.65}
+      dragElastic={0.75}
       onDragEnd={handleDragEnd}
       exit={{
-        x: x.get() > 0 ? 600 : -600,
+        x: effectiveExitDirection === 'right' ? 800 : -800,
+        rotate: effectiveExitDirection === 'right' ? 22 : -22,
         opacity: 0,
-        transition: { duration: 0.25 },
+        transition: { duration: 0.22, ease: [0.32, 0.72, 0, 1] },
       }}
     >
       {/* LIKE STAMP (Basil Green #2D6A4F) */}
@@ -106,7 +119,7 @@ export const VenueCard: React.FC<VenueCardProps> = ({ venue, onSwipe, isTop }) =
         PAS ❌
       </motion.div>
 
-      {/* Venue Photo & Sponsored Badge */}
+      {/* Venue Photo */}
       <div className="relative w-full h-3/5 bg-stone-100">
         <img
           src={venue.photoUrl || FALLBACK_IMAGE}
@@ -119,12 +132,6 @@ export const VenueCard: React.FC<VenueCardProps> = ({ venue, onSwipe, isTop }) =
             img.src = FALLBACK_IMAGE;
           }}
         />
-        {venue.isSponsored && (
-          <div className="absolute top-4 left-4 bg-[#D9381E] text-white text-[11px] font-bold px-3 py-1 rounded-full shadow-md flex items-center gap-1">
-            <Sparkles className="w-3 h-3" />
-            <span>{venue.sponsorBadge || 'Sponsorlu Lezzet'}</span>
-          </div>
-        )}
       </div>
 
       {/* Venue Editorial Information */}
@@ -147,12 +154,6 @@ export const VenueCard: React.FC<VenueCardProps> = ({ venue, onSwipe, isTop }) =
             <MapPin className="w-3.5 h-3.5 shrink-0 mt-0.5 text-[#78716C]" />
             <p className="line-clamp-2">{venue.address}</p>
           </div>
-
-          {venue.sponsorPromoText && (
-            <p className="mt-1 text-[11px] font-semibold text-[#D9381E] bg-[#FDF2F0] px-2 py-0.5 rounded-md truncate">
-              {venue.sponsorPromoText}
-            </p>
-          )}
         </div>
 
         <div className="flex items-center justify-between pt-2 border-t border-[#E7E2D9] text-xs font-medium text-[#78716C]">

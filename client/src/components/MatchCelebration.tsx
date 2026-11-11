@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import confetti from 'canvas-confetti';
 import {
   Star,
@@ -8,7 +8,6 @@ import {
   Share2,
   Phone,
   Utensils,
-  ExternalLink,
 } from 'lucide-react';
 import { Venue, RoomLocation } from '../types.js';
 import {
@@ -75,8 +74,6 @@ export const MatchCelebration: React.FC<MatchCelebrationProps> = ({
   roomLocation,
   duelResult,
 }) => {
-  const [showDeliveryOptions, setShowDeliveryOptions] = useState(false);
-
   useEffect(() => {
     triggerCelebrationEffects();
   }, []);
@@ -98,11 +95,6 @@ export const MatchCelebration: React.FC<MatchCelebrationProps> = ({
         )
       : undefined;
 
-  // ACTION-02: Start direct Google Maps turn-by-turn route navigation
-  const handleOpenGoogleMaps = () => {
-    window.open(navigationUrl, '_blank', 'noopener,noreferrer');
-  };
-
   // ACTION-03: Call restaurant directly via sanitized tel: URI or phone lookup fallback
   const handleCallVenue = () => {
     if (safeTelUri) {
@@ -111,11 +103,6 @@ export const MatchCelebration: React.FC<MatchCelebrationProps> = ({
       const phoneQuery = encodeURIComponent(`${venue.name} ${venue.address} telefon iletişim`);
       window.open(`https://www.google.com/search?q=${phoneQuery}`, '_blank', 'noopener,noreferrer');
     }
-  };
-
-  // ACTION-03: Open delivery platform search
-  const handleOpenDeliveryPlatform = (url: string) => {
-    window.open(url, '_blank', 'noopener,noreferrer');
   };
 
   const handleShareResult = () => {
@@ -205,12 +192,6 @@ export const MatchCelebration: React.FC<MatchCelebrationProps> = ({
               <span>{venue.address}</span>
             </p>
 
-            {venue.sponsorPromoText && (
-              <p className="mt-2 text-[11px] font-semibold text-[#D9381E] bg-[#FDF2F0] px-2.5 py-1 rounded-md">
-                {venue.sponsorPromoText}
-              </p>
-            )}
-
             <div className="flex items-center justify-between pt-2.5 mt-2.5 border-t border-[#E7E2D9] text-xs font-medium text-[#78716C]">
               <span>
                 Fiyat: <strong className="text-[#1C1917]">{priceTier.symbols}</strong> ({priceTier.label})
@@ -222,97 +203,68 @@ export const MatchCelebration: React.FC<MatchCelebrationProps> = ({
           </div>
         </div>
 
-        {/* Post-Match Action Buttons (ACTION-02 & ACTION-03) */}
+        {/* Post-Match Action Buttons (ACTION-02, ACTION-03 & MOB-04) */}
         <div className="space-y-2 pt-1">
-          {/* Primary CTA: Turn-by-turn Google Maps Navigation (ACTION-02) */}
-          <button
-            type="button"
-            onClick={handleOpenGoogleMaps}
+          {/* Primary CTA: Turn-by-turn Google Maps Navigation with Live GPS Origin (ACTION-02) */}
+          <a
+            href={navigationUrl}
+            target="_blank"
+            rel="noopener noreferrer"
             className="w-full flex items-center justify-center gap-2 py-3.5 px-4 rounded-xl bg-[#D9381E] hover:bg-[#BF2F18] text-white font-semibold text-sm transition-colors shadow-xs active:translate-y-px cursor-pointer"
           >
             <Navigation className="w-4 h-4" />
             <span>🧭 Yol Tarifi Al (Google Haritalar)</span>
-          </button>
+          </a>
 
-          {/* Secondary CTA Row: Delivery Order & Direct Phone Call (ACTION-03) */}
+          {/* Direct Delivery Platform Row: Yemeksepeti & Uber Eats (MOB-04) */}
           <div className="grid grid-cols-2 gap-2">
-            <button
-              type="button"
-              onClick={() => setShowDeliveryOptions((prev) => !prev)}
-              aria-expanded={showDeliveryOptions}
-              className="flex items-center justify-center gap-1.5 py-3 px-3 rounded-xl bg-[#2D6A4F] hover:bg-[#24543E] text-white font-semibold text-xs transition-colors shadow-2xs active:translate-y-px cursor-pointer"
+            <a
+              href={deliveryLinks.yemeksepetiUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center gap-1.5 py-3 px-3 rounded-xl bg-[#EA004B] hover:bg-[#D00042] text-white font-bold text-xs transition-colors shadow-2xs active:translate-y-px cursor-pointer"
             >
               <Utensils className="w-3.5 h-3.5 shrink-0" />
-              <span>🛵 Sipariş Ver</span>
-            </button>
+              <span>🛵 Yemeksepeti</span>
+            </a>
 
+            <a
+              href={deliveryLinks.uberEatsUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center gap-1.5 py-3 px-3 rounded-xl bg-[#06C167] hover:bg-[#05A357] text-white font-bold text-xs transition-colors shadow-2xs active:translate-y-px cursor-pointer"
+            >
+              <Utensils className="w-3.5 h-3.5 shrink-0" />
+              <span>🍔 Uber Eats</span>
+            </a>
+          </div>
+
+          {/* Tertiary Row: Direct Phone Call & WhatsApp Share */}
+          <div className="grid grid-cols-2 gap-2">
             <button
               type="button"
               onClick={handleCallVenue}
               title={venue.phone ? `Ara: ${venue.phone}` : 'Telefon numarasını bul'}
-              className="flex items-center justify-center gap-1.5 py-3 px-3 rounded-xl bg-white border border-[#E7E2D9] hover:bg-[#FAF7F2] text-[#1C1917] font-semibold text-xs transition-colors active:translate-y-px cursor-pointer"
+              className="flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl bg-white border border-[#E7E2D9] hover:bg-[#FAF7F2] text-[#1C1917] font-semibold text-xs transition-colors active:translate-y-px cursor-pointer"
             >
               <Phone className="w-3.5 h-3.5 text-[#D9381E] shrink-0" />
               <span className="truncate">{venue.phone ? '📞 Hemen Ara' : '📞 Numara Bul'}</span>
             </button>
+
+            <button
+              type="button"
+              onClick={handleShareResult}
+              className="flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl bg-white border border-[#E7E2D9] hover:bg-[#FAF7F2] text-[#1C1917] font-semibold text-xs transition-colors active:translate-y-px cursor-pointer"
+            >
+              <Share2 className="w-3.5 h-3.5 text-[#2D6A4F] shrink-0" />
+              <span className="truncate">💬 WhatsApp</span>
+            </button>
           </div>
-
-          {/* Expandable Delivery Platform Picker (ACTION-03) */}
-          {showDeliveryOptions && (
-            <div className="p-3 rounded-2xl bg-white border border-[#E7E2D9] space-y-2 text-left animate-in fade-in duration-150">
-              <p className="text-[11px] font-bold uppercase tracking-wider text-[#78716C]">
-                Sipariş Platformu Seçin
-              </p>
-              <div className="grid grid-cols-3 gap-1.5">
-                <button
-                  type="button"
-                  onClick={() => handleOpenDeliveryPlatform(deliveryLinks.yemeksepetiUrl)}
-                  className="py-2 px-2 rounded-lg bg-[#FDF2F0] hover:bg-[#FCE4DF] text-[#D9381E] font-bold text-[11px] flex items-center justify-center gap-1 transition-colors cursor-pointer"
-                >
-                  <span>Yemeksepeti</span>
-                  <ExternalLink className="w-2.5 h-2.5 shrink-0" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleOpenDeliveryPlatform(deliveryLinks.getirYemekUrl)}
-                  className="py-2 px-2 rounded-lg bg-[#F5F0EB] hover:bg-[#EAE2D9] text-[#1C1917] font-bold text-[11px] flex items-center justify-center gap-1 transition-colors cursor-pointer"
-                >
-                  <span>GetirYemek</span>
-                  <ExternalLink className="w-2.5 h-2.5 shrink-0" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleOpenDeliveryPlatform(deliveryLinks.trendyolYemekUrl)}
-                  className="py-2 px-2 rounded-lg bg-[#FFF3E0] hover:bg-[#FFE0B2] text-[#E65100] font-bold text-[11px] flex items-center justify-center gap-1 transition-colors cursor-pointer"
-                >
-                  <span>Trendyol</span>
-                  <ExternalLink className="w-2.5 h-2.5 shrink-0" />
-                </button>
-              </div>
-              <button
-                type="button"
-                onClick={() => handleOpenDeliveryPlatform(deliveryLinks.primaryUrl)}
-                className="w-full py-1.5 text-center text-[11px] font-semibold text-[#78716C] hover:text-[#1C1917] underline cursor-pointer"
-              >
-                Tüm Sipariş Seçeneklerini Google'da Ara
-              </button>
-            </div>
-          )}
-
-          {/* Share & Restart Actions */}
-          <button
-            type="button"
-            onClick={handleShareResult}
-            className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-white border border-[#E7E2D9] hover:bg-[#FAF7F2] text-[#1C1917] font-semibold text-xs transition-colors active:translate-y-px cursor-pointer"
-          >
-            <Share2 className="w-3.5 h-3.5 text-[#2D6A4F]" />
-            <span>WhatsApp ile Arkadaşına Gönder</span>
-          </button>
 
           <button
             type="button"
             onClick={onLeave}
-            className="w-full text-center py-1.5 text-xs text-[#78716C] hover:text-[#D9381E] transition-colors cursor-pointer"
+            className="w-full text-center py-2 text-xs text-[#78716C] hover:text-[#D9381E] transition-colors cursor-pointer"
           >
             Yeni Karar Odası Başlat
           </button>

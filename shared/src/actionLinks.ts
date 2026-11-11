@@ -41,10 +41,11 @@ export function formatPriceTier(priceLevel?: 1 | 2 | 3 | 4): {
 
 /**
  * Builds a universal cross-platform Google Maps turn-by-turn navigation URL (ACTION-02).
+ * Omits the 'origin' parameter so Google Maps dynamically routes from the user's live device GPS ("Konumunuz").
  */
 export function buildGoogleMapsNavigationUrl(
   venue: Pick<Venue, 'id' | 'name' | 'address' | 'location' | 'googleMapsUrl'>,
-  originCoords?: { lat: number; lng: number }
+  _originCoords?: { lat: number; lng: number }
 ): string {
   if (venue.googleMapsUrl && venue.googleMapsUrl.startsWith('https://www.google.com/maps/dir/')) {
     return venue.googleMapsUrl;
@@ -63,16 +64,7 @@ export function buildGoogleMapsNavigationUrl(
     }
   }
 
-  if (
-    originCoords &&
-    typeof originCoords.lat === 'number' &&
-    typeof originCoords.lng === 'number' &&
-    Number.isFinite(originCoords.lat) &&
-    Number.isFinite(originCoords.lng)
-  ) {
-    params.set('origin', `${originCoords.lat},${originCoords.lng}`);
-  }
-
+  // Omitting 'origin' prompts Google Maps to use live device GPS location
   return `https://www.google.com/maps/dir/?${params.toString()}`;
 }
 
@@ -90,42 +82,37 @@ export function sanitizePhoneUri(phone?: string): string | null {
 export interface DeliveryPlatformLinks {
   primaryUrl: string;
   yemeksepetiUrl: string;
+  uberEatsUrl: string;
   getirYemekUrl: string;
   trendyolYemekUrl: string;
 }
 
 /**
- * Builds food delivery search URLs for Turkish delivery platforms and general order lookup (ACTION-03).
+ * Builds food delivery universal links for mobile app opening and web ordering (ACTION-03, MOB-04).
  */
 export function buildDeliveryLinks(
   venue: Pick<Venue, 'name' | 'address' | 'deliveryUrl'>,
   locationLabel?: string
 ): DeliveryPlatformLinks {
   const region = locationLabel ? locationLabel.replace(/\s*\(GPS\)\s*/i, '').trim() : '';
-  const baseQuery = [venue.name, region || venue.address].filter(Boolean).join(' ');
+  const venueQuery = encodeURIComponent(venue.name.trim());
+  const contextQuery = encodeURIComponent([venue.name, region].filter(Boolean).join(' '));
 
-  const yemeksepetiUrl = `https://www.google.com/search?q=${encodeURIComponent(
-    `${baseQuery} Yemeksepeti online sipariş`
-  )}`;
-  const getirYemekUrl = `https://www.google.com/search?q=${encodeURIComponent(
-    `${baseQuery} GetirYemek sipariş`
-  )}`;
-  const trendyolYemekUrl = `https://www.google.com/search?q=${encodeURIComponent(
-    `${baseQuery} Trendyol Yemek sipariş`
-  )}`;
+  // Universal Links: Opens native app directly if installed on phone, else opens website search
+  const yemeksepetiUrl = `https://www.yemeksepeti.com/search?query=${venueQuery}`;
+  const uberEatsUrl = `https://www.ubereats.com/search?q=${venueQuery}`;
+  const getirYemekUrl = `https://getir.com/yemek/arama?q=${venueQuery}`;
+  const trendyolYemekUrl = `https://www.trendyol.com/sr?q=${contextQuery}`;
 
   const hasSafeCustomUrl =
     typeof venue.deliveryUrl === 'string' && /^https:\/\/[^\s]+$/i.test(venue.deliveryUrl);
 
-  const primaryUrl = hasSafeCustomUrl
-    ? venue.deliveryUrl!
-    : `https://www.google.com/search?q=${encodeURIComponent(
-        `${baseQuery} yemek siparişi`
-      )}`;
+  const primaryUrl = hasSafeCustomUrl ? venue.deliveryUrl! : yemeksepetiUrl;
 
   return {
     primaryUrl,
     yemeksepetiUrl,
+    uberEatsUrl,
     getirYemekUrl,
     trendyolYemekUrl,
   };

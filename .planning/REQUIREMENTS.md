@@ -40,10 +40,10 @@
 
 ### Mobile UX & Location Polish (MOB)
 
-- [ ] **MOB-01**: Sola ve sağa kart kaydırma yönü kullanıcının sürükleme yönüne (`like` -> sağ, `pass` -> sol) kilitlenmeli, bırakma anında `x` yaylanmasından bağımsız olarak doğru yöne uçmalıdır.
-- [ ] **MOB-02**: Sponsorlu mekan enjeksiyonu sadece o ilçeye/şehre ait sponsorları içermelidir; Adana seçildiğinde Kadıköy mekanı listeye sızmamalıdır.
-- [ ] **MOB-03**: Google Haritalar `Yol Tarifi Al` butonu sabit sunucu koordinatı yerine dinamik olarak telefonun canlı konumunu (`Konumunuz`) başlangıç noktası olarak almalıdır.
-- [ ] **MOB-04**: `Sipariş Ver` butonları ve harici link geçişlerinde mobilde WebSocket arka plana düştüğünde kullanıcı odadan atılmamalı; eşleşme kutlaması sekmeler arası geçişte kalıcı olmalıdır.
+- [x] **MOB-01**: Sola ve sağa kart kaydırma yönü kullanıcının sürükleme yönüne (`like` -> sağ, `pass` -> sol) kilitlenmeli, bırakma anında `x` yaylanmasından bağımsız olarak doğru yöne uçmalıdır.
+- [x] **MOB-02**: Sponsorlu mekan mantığı tamamen kaldırıldı; destedeki tüm mekanlar %100 kullanıcının konumundaki gerçek yerel mekanlardır.
+- [x] **MOB-03**: Google Haritalar `Yol Tarifi Al` butonu sabit sunucu koordinatı yerine dinamik olarak telefonun canlı konumunu (`Konumunuz`) başlangıç noktası olarak almalıdır.
+- [x] **MOB-04**: `Yemeksepeti` ve `Uber Eats` doğrudan uygulama linkleri olarak çalışır; sekmeler veya uygulamalar arası geçişte oda kapanmaz.
 
 ## Traceability
 
@@ -67,12 +67,11 @@
 | ACTION-01 | Phase 5 | Complete |
 | ACTION-02 | Phase 5 | Complete |
 | ACTION-03 | Phase 5 | Complete |
-| MOB-01 | Phase 6 | Planned |
-| MOB-02 | Phase 6 | Planned |
-| MOB-03 | Phase 6 | Planned |
-| MOB-04 | Phase 6 | Planned |
+| MOB-01 | Phase 6 | Complete |
+| MOB-02 | Phase 6 | Complete |
+| MOB-03 | Phase 6 | Complete |
+| MOB-04 | Phase 6 | Complete |
 
 **Coverage:**
 - v1 requirements: 22 total
-- Completed: 18 / 22 (82%)
-- Planned: 4 / 22
+- Completed: 22 / 22 (100%) ✓

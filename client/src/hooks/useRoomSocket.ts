@@ -328,10 +328,24 @@ export function useRoomSocket() {
     };
   }, [peerDisconnectSeconds]);
 
-  // Connect on mount
+  // Connect on mount & reconnect on window focus / visibility change (MOB-04)
   useEffect(() => {
     connect();
+
+    const handleFocusOrVisible = () => {
+      if (document.visibilityState === 'visible') {
+        if (!socketRef.current || socketRef.current.readyState === WebSocket.CLOSED) {
+          connect();
+        }
+      }
+    };
+
+    window.addEventListener('visibilitychange', handleFocusOrVisible);
+    window.addEventListener('focus', handleFocusOrVisible);
+
     return () => {
+      window.removeEventListener('visibilitychange', handleFocusOrVisible);
+      window.removeEventListener('focus', handleFocusOrVisible);
       if (reconnectTimerRef.current) clearTimeout(reconnectTimerRef.current);
       if (socketRef.current) socketRef.current.close();
     };

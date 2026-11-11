@@ -58,20 +58,19 @@ test('mapPriceLevel - translates Google Places price levels', () => {
   assert.strictEqual(mapPriceLevel('OTHER'), 2);
 });
 
-test('VenueService - offline fallback returns 15 venues with slot 2 sponsor when no API key', async () => {
+test('VenueService - offline fallback returns 15 100% organic venues with zero sponsors when no API key', async () => {
   const service = new VenueService(undefined); // No API key
   const deck = await service.getVenuesForDistrict('kadikoy-moda');
 
   assert.strictEqual(deck.length, 15);
-  // Slot 2 (index 1) must be sponsored
-  assert.strictEqual(deck[1].isSponsored, true);
-  assert.strictEqual(deck[1].sponsorBadge, 'Öne Çıkan Lezzet');
-
-  // First item must be organic
-  assert.strictEqual(deck[0].isSponsored, undefined);
-  assert.ok(deck[0].name.length > 0);
-  assert.ok(deck[0].rating > 0);
-  assert.ok(deck[0].photoUrl.length > 0);
+  // Zero sponsored entries across the entire deck
+  for (const venue of deck) {
+    assert.strictEqual(venue.isSponsored, undefined);
+    assert.strictEqual(venue.sponsorBadge, undefined);
+    assert.ok(venue.name.length > 0);
+    assert.ok(venue.rating > 0);
+    assert.ok(venue.photoUrl.length > 0);
+  }
 });
 
 test('VenueService - resolveLocationAndVenues handles valid district ID', async () => {
@@ -82,7 +81,7 @@ test('VenueService - resolveLocationAndVenues handles valid district ID', async 
   assert.strictEqual(result.location.label, 'Beşiktaş, Çarşı');
   assert.strictEqual(result.location.isGps, false);
   assert.strictEqual(result.venues.length, 15);
-  assert.strictEqual(result.venues[1].isSponsored, true);
+  assert.strictEqual(result.venues[1].isSponsored, undefined);
 });
 
 test('VenueService - resolveLocationAndVenues handles GPS coordinates', async () => {
@@ -95,7 +94,7 @@ test('VenueService - resolveLocationAndVenues handles GPS coordinates', async ()
   assert.strictEqual(result.location.districtId, 'sisli-nisantasi');
   assert.strictEqual(result.location.isGps, true);
   assert.strictEqual(result.venues.length, 15);
-  assert.strictEqual(result.venues[1].isSponsored, true);
+  assert.strictEqual(result.venues[1].isSponsored, undefined);
 });
 
 test('VenueService - caches results in-memory avoiding recalculation', async () => {
@@ -129,6 +128,7 @@ test('balanceDeckDiversity - alternates culinary categories and eliminates conse
 });
 
 test('cleanTurkishVenueName - normalizes all-caps and ASCII typos to proper Turkish orthography', () => {
+  assert.strictEqual(cleanTurkishVenueName('uzum resturan'), 'Üzüm Restoran');
   assert.strictEqual(cleanTurkishVenueName('BİRBİÇER KEBAP'), 'Birbiçer Kebap');
   assert.strictEqual(cleanTurkishVenueName('Sirdanci Bedo'), 'Şırdancı Bedo');
   assert.strictEqual(cleanTurkishVenueName('CİGERCİ MEMET USTA'), 'Ciğerci Memet Usta');

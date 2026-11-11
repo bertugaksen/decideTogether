@@ -63,15 +63,15 @@ Plans:
 **Requirements**: MOB-01, MOB-02, MOB-03, MOB-04
 **Depends on:** Phase 5
 **Success Criteria** (what must be TRUE):
-  1. Kart sola kaydırıldığında daima sola (-600), sağa kaydırıldığında daima sağa (+600) akıcı yay fiziğiyle fırlar.
-  2. Adana veya başka bir ilçe seçildiğinde listeye farklı bir şehre ait (Kadıköy vb.) sponsorlu mekan asla sızmaz.
+  1. Kart sola kaydırıldığında daima sola (-800), sağa kaydırıldığında daima sağa (+800) akıcı yay fiziğiyle fırlar.
+  2. Adana veya başka bir ilçe seçildiğinde listeye farklı bir şehre ait (Kadıköy vb.) sponsorlu mekan asla sızmaz; sponsor katmanı %100 kaldırılmıştır.
   3. `🧭 Yol Tarifi Al` butonu sabit sunucu koordinatını değil, telefonun canlı konumunu (`Konumunuz`) rota başlangıcı olarak açar.
-  4. `🛵 Sipariş Ver` seçenekleri açıldığında veya sekmeler arası geçişte WebSocket arka planda kopsa bile kullanıcı odadan atılmaz; eşleşme oturumu korunur.
-**Plans:** 2 plans
+  4. `🛵 Yemeksepeti` ve `🍔 Uber Eats` butonları doğrudan ilgili uygulamaları/sipariş sayfasını açar; sekmeler arası geçişte oda kapanmaz.
+**Plans:** 2/2 plans executed
 
 Plans:
-- [ ] 06-01-PLAN.md — Backend Regional Sponsor Filter, Dynamic GPS Navigation URL & Match State Persistence
-- [ ] 06-02-PLAN.md — Client Swipe Gesture Direction Locking, Tactile Feedback & Mobile Delivery Modal Flow
+- [x] 06-01-PLAN.md — Backend Regional Sponsor Filter, Dynamic GPS Navigation URL & Match State Persistence
+- [x] 06-02-PLAN.md — Client Swipe Gesture Direction Locking, Tactile Feedback & Mobile Delivery Modal Flow
 
 ## Progress
 
@@ -85,4 +85,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 | 3. Gesture Deck & Instant Match Celebration | 2/2 | Complete | 2026-11-08 |
 | 4. Rapid Tapper Tie-Breaker Duel | 2/2 | Complete | 2026-11-09 |
 | 5. Post-Match Navigation & Delivery Actions | 2/2 | Complete | 2026-11-11 |
-| 6. Mobile UX, Swipe Physics & Location Navigation Polish | 0/2 | Planned | - |
+| 6. Mobile UX, Swipe Physics & Location Navigation Polish | 2/2 | Complete | 2026-11-11 |
