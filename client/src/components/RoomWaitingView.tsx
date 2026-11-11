@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Share2, Copy, Check, Users, Edit2, Eye, ArrowRight } from 'lucide-react';
+import { Share2, Copy, Check, Users, Edit2, Eye, ArrowRight, Utensils } from 'lucide-react';
 import { Room, Participant } from '../types.js';
 
 export interface RoomWaitingViewProps {
@@ -178,7 +178,7 @@ export const RoomWaitingView: React.FC<RoomWaitingViewProps> = ({
               onClick={onStartSwiping}
               className="w-full flex items-center justify-center gap-2 py-3.5 px-4 rounded-xl bg-[#2D6A4F] hover:bg-[#24543E] text-white font-display font-bold text-base transition-all shadow-md active:translate-y-px cursor-pointer"
             >
-              <span>🎮 Eşleşmeyi / Oylamayı Başlat</span>
+              <span>Oylamayı Başlat</span>
               <ArrowRight className="w-5 h-5" />
             </button>
             <p className="text-[11px] text-center text-[#78716C] mt-1.5">
@@ -202,7 +202,7 @@ export const RoomWaitingView: React.FC<RoomWaitingViewProps> = ({
             onClick={onOpenVenueList}
             className="flex items-center gap-3 cursor-pointer flex-1"
           >
-            <span className="text-2xl">🍕</span>
+            <Utensils className="w-5 h-5 text-[#E07A5F] shrink-0" />
             <div>
               <div className="flex items-center gap-1.5">
                 <p className="text-[10px] font-bold uppercase tracking-wider text-[#D9381E]">

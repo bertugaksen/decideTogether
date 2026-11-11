@@ -29,15 +29,15 @@ export const DeckExhausted: React.FC<DeckExhaustedProps> = ({
       aria-modal="true"
       className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-200"
     >
-      <div className="relative w-full max-w-sm bg-[#FBF9F5] rounded-3xl border border-[#E7E2D9] p-6 shadow-xl space-y-4 text-center">
+      <div className="relative w-full max-w-sm bg-[#FBF9F5] rounded-3xl border border-[#E7E2D9] p-6 space-y-4 text-center">
         {/* Header and description */}
-        <div className="w-14 h-14 mx-auto rounded-2xl bg-[#FFF3E0] text-[#E65100] flex items-center justify-center text-3xl shadow-xs">
-          ⚔️
+        <div className="w-14 h-14 mx-auto rounded-2xl bg-[#FAF7F2] border border-[#E7E2D9] flex items-center justify-center">
+          <Swords className="w-6 h-6 text-[#E07A5F]" />
         </div>
 
         <div>
-          <span className="inline-block text-xs font-bold uppercase tracking-wider text-[#E65100] bg-[#FFF3E0] px-3 py-1 rounded-full">
-            ORTAK KARAR BULUNAMADI
+          <span className="inline-block text-xs font-medium text-[#78716C] bg-[#FAF7F2] border border-[#E7E2D9] px-3 py-1 rounded-full">
+            Ortak karar bulunamadı
           </span>
           <h2 className="font-display font-extrabold text-2xl text-[#1C1917] mt-2">
             Beraberlik!

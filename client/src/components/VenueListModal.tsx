@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Star, MapPin, Sparkles, UtensilsCrossed } from 'lucide-react';
+import { X, Star, MapPin, UtensilsCrossed } from 'lucide-react';
 import { Venue } from '../types.js';
 
 interface VenueListModalProps {
@@ -61,11 +61,7 @@ export const VenueListModal: React.FC<VenueListModalProps> = ({
             venues.map((venue, idx) => (
               <div
                 key={venue.id || idx}
-                className={`p-3.5 rounded-xl border transition-all ${
-                  venue.isSponsored
-                    ? 'bg-[#FFFBF5] border-[#F0D5BA] shadow-2xs'
-                    : 'bg-white border-[#E7E2D9] hover:border-[#D0C9BD]'
-                }`}
+                className="p-3.5 rounded-xl border border-[#E7E2D9] bg-white hover:border-[#D0C9BD] transition-all"
               >
                 <div className="flex items-start gap-3">
                   {/* Photo or placeholder */}
@@ -91,12 +87,6 @@ export const VenueListModal: React.FC<VenueListModalProps> = ({
                       <h4 className="font-bold text-sm text-[#1C1917] truncate">
                         {venue.name}
                       </h4>
-                      {venue.isSponsored && (
-                        <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#D9381E] text-white">
-                          <Sparkles className="w-2.5 h-2.5" />
-                          {venue.sponsorBadge || 'Öne Çıkan'}
-                        </span>
-                      )}
                     </div>
 
                     <p className="text-xs text-[#78716C] mt-0.5 truncate">{venue.category}</p>

@@ -75,7 +75,7 @@ export const Lobby: React.FC<LobbyProps> = ({ socket: externalSocket }) => {
     if (!room) return;
     const shareUrl = `${window.location.origin}/?room=${room.code}`;
     const text = encodeURIComponent(
-      `🍕 Bu akşam ne yiyoruz? DecideTogether odama katıl, birlikte hızlıca karar verelim!\n\n👉 Katılmak için tıkla: ${shareUrl}\n(Veya PIN: ${room.code})`
+      `Birlikte ne yiyoruz? DecideTogether odama katıl, 10 saniyede karar verelim.\n\nKatılmak için linke tıkla: ${shareUrl}\n(Oda PIN: ${room.code})`
     );
     window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank', 'noopener,noreferrer');
   };
@@ -168,7 +168,7 @@ export const Lobby: React.FC<LobbyProps> = ({ socket: externalSocket }) => {
             )}
           </div>
           <h2 className="font-display text-3xl font-extrabold text-[#1C1917] tracking-tight leading-tight">
-            Bu akşam ne yiyoruz?
+            Birlikte ne yiyoruz?
           </h2>
           <p className="text-sm text-[#78716C] mt-1">
             Birlikte karar vermenin en lezzetli ve hızlı yolu.
