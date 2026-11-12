@@ -7,6 +7,7 @@ import { RoomManager } from './roomManager.js';
 import { ClientMessage } from './types.js';
 import { MOCK_DISTRICTS } from './services/mockVenues.js';
 import { isValidCoordinate } from './services/venueService.js';
+import { logger } from './logger.js';
 
 const app = express();
 const port = process.env.PORT || 3001;
@@ -16,13 +17,25 @@ app.use(express.json());
 
 const roomManager = new RoomManager();
 
-// REST Health Check
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', service: 'decidetogether-backend', timestamp: Date.now() });
+// Production Health Check & Monitoring Telemetry (T-08-03: Zero Sensitive Disclosure)
+const getHealthPayload = () => ({
+  status: 'ok',
+  uptime: process.uptime(),
+  activeRooms: roomManager.getActiveRoomCount(),
+  storage: 'sqlite',
+  timestamp: new Date().toISOString(),
+});
+
+app.get('/health', (_req, res) => {
+  res.json(getHealthPayload());
+});
+
+app.get('/api/health', (_req, res) => {
+  res.json(getHealthPayload());
 });
 
 // REST Districts (VENUE-01 / VENUE-02)
-app.get('/api/districts', (req, res) => {
+app.get('/api/districts', (_req, res) => {
   res.json({ districts: MOCK_DISTRICTS });
 });
 
@@ -44,7 +57,7 @@ app.get('/api/locations/resolve', async (req, res) => {
       venueCount: resolved.venues.length,
     });
   } catch (err) {
-    console.error('[LocationResolve] Error resolving location:', err);
+    logger.error('Error resolving location', err, { endpoint: '/api/locations/resolve' });
     res.status(500).json({ error: 'Konum çözümlenemedi' });
   }
 });
@@ -76,7 +89,7 @@ app.get('/api/venues/photo', async (req, res) => {
     const arrayBuffer = await photoRes.arrayBuffer();
     return res.send(Buffer.from(arrayBuffer));
   } catch (err) {
-    console.error('[PhotoProxy] Error proxying Google Places photo:', err);
+    logger.error('Error proxying Google Places photo', err, { endpoint: '/api/venues/photo' });
     return res.redirect(fallbackUrl);
   }
 });
@@ -181,10 +194,10 @@ wss.on('connection', (ws: WebSocket) => {
         }
 
         default:
-          console.log('Unhandled client message:', message);
+          logger.warn('Unhandled client message', { messageType: (message as any)?.type });
       }
     } catch (err) {
-      console.error('Error parsing client message:', err);
+      logger.error('Error parsing client message', err);
       if (ws.readyState === WebSocket.OPEN) {
         ws.send(JSON.stringify({ type: 'ERROR', message: 'Geçersiz mesaj formatı' }));
       }
@@ -197,12 +210,12 @@ wss.on('connection', (ws: WebSocket) => {
   });
 
   ws.on('error', (err) => {
-    console.error('WebSocket connection error:', err);
+    logger.error('WebSocket connection error', err);
     roomManager.handleDisconnect(ws);
   });
 });
 
 server.listen(port, () => {
-  console.log(`[DecideTogether] Backend server running on http://localhost:${port}`);
-  console.log(`[DecideTogether] WebSockets active on ws://localhost:${port}/ws`);
+  logger.info(`Backend server running on http://localhost:${port}`);
+  logger.info(`WebSockets active on ws://localhost:${port}/ws`);
 });

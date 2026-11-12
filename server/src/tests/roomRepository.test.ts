@@ -201,3 +201,33 @@ test('RoomManager - accepts injected IRoomRepository and runs expired room clean
   manager.destroy();
 });
 
+test('logger - formats messages with ISO timestamp and log level (ENG-04)', async () => {
+  const { logger } = await import('../logger.js');
+
+  const logs: string[] = [];
+  const origLog = console.log;
+  const origWarn = console.warn;
+  const origError = console.error;
+
+  console.log = (msg: string) => logs.push(msg);
+  console.warn = (msg: string) => logs.push(msg);
+  console.error = (msg: string) => logs.push(msg);
+
+  try {
+    logger.info('Test info message', { testKey: 'testVal' });
+    logger.warn('Test warn message');
+    logger.error('Test error message', new Error('sample failure'), { code: 500 });
+
+    assert.equal(logs.length, 3);
+    assert.match(logs[0], /^\[\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z\] \[INFO\] Test info message {"testKey":"testVal"}/);
+    assert.match(logs[1], /^\[\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z\] \[WARN\] Test warn message$/);
+    assert.match(logs[2], /^\[\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z\] \[ERROR\] Test error message/);
+    assert.ok(logs[2].includes('sample failure'));
+  } finally {
+    console.log = origLog;
+    console.warn = origWarn;
+    console.error = origError;
+  }
+});
+
+
