@@ -46,7 +46,7 @@ export const SwipeDeck: React.FC<SwipeDeckProps> = ({
       : 0;
   const [currentIndex, setCurrentIndex] = useState(savedCardIndex);
   const [isTransitioning, setIsTransitioning] = useState(false);
-  const [exitDirection, setExitDirection] = useState<'left' | 'right' | null>(null);
+  const [triggerSwipe, setTriggerSwipe] = useState<'like' | 'pass' | null>(null);
   const [showCelebrationModal, setShowCelebrationModal] = useState(false);
 
   useEffect(() => {
@@ -66,23 +66,25 @@ export const SwipeDeck: React.FC<SwipeDeckProps> = ({
     }
   }, [matchedVenue]);
 
-  const handleCardSwipe = useCallback(
+  const handleButtonClick = useCallback(
     (direction: 'like' | 'pass') => {
-      // 220ms transition lock prevents double-swiping while keeping fluidity
       if (isTransitioning || currentIndex >= venues.length) return;
       setIsTransitioning(true);
-      setExitDirection(direction === 'like' ? 'right' : 'left');
+      setTriggerSwipe(direction);
+    },
+    [currentIndex, isTransitioning, venues.length]
+  );
 
+  const handleSwipeComplete = useCallback(
+    (direction: 'like' | 'pass') => {
+      if (currentIndex >= venues.length) return;
       const currentVenue = venues[currentIndex];
       onSwipe(currentVenue.id, direction, currentIndex, venues.length);
-
-      setTimeout(() => {
-        setCurrentIndex((prev) => prev + 1);
-        setExitDirection(null);
-        setIsTransitioning(false);
-      }, 220);
+      setCurrentIndex((prev) => prev + 1);
+      setTriggerSwipe(null);
+      setIsTransitioning(false);
     },
-    [currentIndex, isTransitioning, onSwipe, venues]
+    [currentIndex, onSwipe, venues]
   );
 
   // 1. If duel active and not finished, render RapidTapperDuel orchestrator
@@ -208,8 +210,8 @@ export const SwipeDeck: React.FC<SwipeDeckProps> = ({
                 key={currentCard.id}
                 venue={currentCard}
                 isTop={true}
-                exitDirection={exitDirection}
-                onSwipe={handleCardSwipe}
+                triggerSwipe={triggerSwipe}
+                onSwipe={handleSwipeComplete}
               />
             )}
           </AnimatePresence>
@@ -222,7 +224,7 @@ export const SwipeDeck: React.FC<SwipeDeckProps> = ({
         <button
           type="button"
           disabled={isTransitioning}
-          onClick={() => handleCardSwipe('pass')}
+          onClick={() => handleButtonClick('pass')}
           className="w-16 h-16 rounded-full bg-white border border-[#E7E2D9] hover:border-[#D9381E] text-[#D9381E] flex items-center justify-center active:scale-[0.98] transition-transform duration-100 cursor-pointer disabled:opacity-50"
           aria-label="Pas Geç"
         >
@@ -233,7 +235,7 @@ export const SwipeDeck: React.FC<SwipeDeckProps> = ({
         <button
           type="button"
           disabled={isTransitioning}
-          onClick={() => handleCardSwipe('like')}
+          onClick={() => handleButtonClick('like')}
           className="w-16 h-16 rounded-full bg-[#2D6A4F] border border-[#2D6A4F] text-white flex items-center justify-center hover:bg-[#24543F] active:scale-[0.98] transition-transform duration-100 cursor-pointer disabled:opacity-50"
           aria-label="Beğen"
         >
