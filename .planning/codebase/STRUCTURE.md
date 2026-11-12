@@ -1,5 +1,5 @@
 ---
-last_mapped_commit: c7f5562b7ba1bdd5b70cffe2de3f22fc3030914f
+last_mapped_commit: 9e5f2869d318f9f5659401bc97637e665352495e
 last_mapped_at: 2026-11-12
 ---
 <Codebase Structure>
