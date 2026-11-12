@@ -110,5 +110,5 @@ Plans:
 **Plans:** 2 plans
 
 Plans:
-- [ ] 08-01-PLAN.md — Storage Repository Pattern, Native SQLite Persistence, Structured Logging & Health Check
+- [x] 08-01-PLAN.md — Storage Repository Pattern, Native SQLite Persistence, Structured Logging & Health Check
 - [ ] 08-02-PLAN.md — Atomic UI Component Decomposition & GitHub Actions CI Workflow
