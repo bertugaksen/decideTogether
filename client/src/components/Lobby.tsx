@@ -123,7 +123,7 @@ export const Lobby: React.FC<LobbyProps> = ({ socket }) => {
   const activeLocationLabel = room?.location?.label || pendingLocation.label;
 
   return (
-    <div className="max-w-md mx-auto h-full overflow-y-auto px-4 py-6 flex flex-col justify-between">
+    <div className="max-w-md mx-auto min-h-[100dvh] px-4 py-6 flex flex-col justify-between">
       <div>
         {/* Header */}
         <header className="flex items-center justify-between pb-4 border-b border-[#E7E2D9]">

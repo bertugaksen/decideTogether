@@ -14,7 +14,13 @@ export const App: React.FC = () => {
   );
 
   return (
-    <main className="h-[100dvh] overflow-hidden select-none touch-none bg-[#FBF9F5] text-[#1C1917]">
+    <main
+      className={`min-h-[100dvh] bg-[#FBF9F5] text-[#1C1917] ${
+        isGameActive
+          ? 'h-[100dvh] overflow-hidden select-none touch-none'
+          : 'overflow-y-auto'
+      }`}
+    >
       {isGameActive && room && currentUser ? (
         <SwipeDeck
           room={room}
