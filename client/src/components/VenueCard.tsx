@@ -11,7 +11,94 @@ interface VenueCardProps {
 }
 
 const FALLBACK_IMAGE =
-  'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=400&q=80';
+  'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=800&q=80';
+
+const getDistanceText = (venue: Venue): string => {
+  if (venue.distanceKm !== undefined && venue.distanceKm !== null) {
+    if (venue.distanceKm < 1) {
+      return `${Math.round(venue.distanceKm * 1000)}m`;
+    }
+    return `${venue.distanceKm.toFixed(1)} km`;
+  }
+  const parts = venue.address.split(',');
+  if (parts.length > 1) {
+    return parts[parts.length - 1].trim();
+  }
+  return 'Civarda';
+};
+
+const formatReviewCount = (count: number): string => {
+  if (count >= 1000) {
+    return `${(count / 1000).toFixed(1)}k`;
+  }
+  return `${count}`;
+};
+
+const CardBody: React.FC<{ venue: Venue }> = ({ venue }) => {
+  const distanceText = getDistanceText(venue);
+
+  return (
+    <>
+      {/* 78% Food-First Photo Container */}
+      <div className="relative w-full h-[78%] bg-stone-900 overflow-hidden">
+        <img
+          src={venue.photoUrl || FALLBACK_IMAGE}
+          alt={venue.name}
+          draggable={false}
+          className="w-full h-full object-cover pointer-events-none"
+          onError={(e) => {
+            const img = e.currentTarget;
+            img.onerror = null;
+            img.src = FALLBACK_IMAGE;
+          }}
+        />
+
+        {/* Smooth Dark Vignette / Scrim Gradient Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-[#141210]/95 via-[#141210]/40 to-transparent flex flex-col justify-end p-5 select-none pointer-events-none">
+          {/* Rating & Distance Badges */}
+          <div className="flex items-center gap-2 mb-2">
+            <div className="flex items-center gap-1 bg-[#D97706]/95 backdrop-blur-xs px-2.5 py-1 rounded-lg text-xs font-bold text-white shadow-xs">
+              <Star className="w-3.5 h-3.5 fill-white text-white" />
+              <span>{venue.rating.toFixed(1)}</span>
+              <span className="text-white/80 font-normal">({formatReviewCount(venue.reviewCount)})</span>
+            </div>
+
+            <div className="flex items-center gap-1 bg-white/20 backdrop-blur-xs px-2.5 py-1 rounded-lg text-xs font-semibold text-white shadow-xs">
+              <MapPin className="w-3 h-3 text-white/90 shrink-0" />
+              <span>{distanceText}</span>
+            </div>
+          </div>
+
+          {/* Large Venue Title directly over photo */}
+          <h3 className="font-display font-bold text-2xl text-white leading-tight tracking-tight drop-shadow-xs line-clamp-1">
+            {venue.name}
+          </h3>
+        </div>
+      </div>
+
+      {/* 22% Minimalist Editorial Ivory Footer Bar */}
+      <div className="h-[22%] bg-[#FAF7F2] px-5 flex items-center justify-between border-t border-[#E7E2D9] text-xs font-medium">
+        <span className="text-[#57534E] font-semibold tracking-wide truncate max-w-[200px]">
+          {venue.category}
+        </span>
+        <span
+          className={
+            venue.isOpenNow !== false
+              ? 'flex items-center gap-1.5 font-semibold text-[#2D6A4F]'
+              : 'flex items-center gap-1.5 font-semibold text-[#78716C]'
+          }
+        >
+          <span
+            className={`w-2 h-2 rounded-full ${
+              venue.isOpenNow !== false ? 'bg-[#2D6A4F]' : 'bg-[#78716C]'
+            }`}
+          />
+          {venue.isOpenNow !== false ? 'Açık' : 'Kapalı'}
+        </span>
+      </div>
+    </>
+  );
+};
 
 export const VenueCard: React.FC<VenueCardProps> = ({
   venue,
@@ -102,48 +189,7 @@ export const VenueCard: React.FC<VenueCardProps> = ({
         animate={{ scale: 0.95, y: 12, opacity: 0.85 }}
         transition={{ type: 'spring', stiffness: 300, damping: 25 }}
       >
-        <img
-          src={venue.photoUrl || FALLBACK_IMAGE}
-          alt={venue.name}
-          draggable={false}
-          className="w-full h-3/5 object-cover pointer-events-none"
-          onError={(e) => {
-            const img = e.currentTarget;
-            img.onerror = null;
-            img.src = FALLBACK_IMAGE;
-          }}
-        />
-        <div className="p-5 flex flex-col justify-between h-2/5">
-          <div>
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-[#E07A5F] uppercase tracking-wider">
-                {venue.category}
-              </span>
-              <div className="flex items-center gap-1 bg-[#F5F0EB] px-2 py-0.5 rounded-lg text-xs font-bold text-[#1C1917]">
-                <Star className="w-3.5 h-3.5 fill-[#E07A5F] text-[#E07A5F]" />
-                <span>{venue.rating.toFixed(1)}</span>
-                <span className="text-[#78716C] font-normal">({venue.reviewCount})</span>
-              </div>
-            </div>
-            <h3 className="font-display font-bold text-2xl text-[#1C1917] mt-1.5 leading-snug tracking-tight line-clamp-1">
-              {venue.name}
-            </h3>
-            <div className="flex items-start gap-1 mt-1 text-xs text-[#78716C]">
-              <MapPin className="w-3.5 h-3.5 shrink-0 mt-0.5 text-[#78716C]" />
-              <p className="line-clamp-2">{venue.address}</p>
-            </div>
-          </div>
-          <div className="flex items-center justify-between pt-2 border-t border-[#E7E2D9] text-xs font-medium text-[#78716C]">
-            <span>Fiyat: {'₺'.repeat(venue.priceLevel || 2)}</span>
-            <span className={venue.isOpenNow ? 'text-[#2D6A4F] font-semibold' : 'text-[#78716C]'}>
-              {venue.isOpenNow !== undefined
-                ? venue.isOpenNow
-                  ? '● Açık'
-                  : '○ Kapalı'
-                : '● Açık'}
-            </span>
-          </div>
-        </div>
+        <CardBody venue={venue} />
       </motion.div>
     );
   }
@@ -160,7 +206,7 @@ export const VenueCard: React.FC<VenueCardProps> = ({
       {/* LIKE STAMP (Basil Green #2D6A4F) */}
       <motion.div
         style={{ opacity: likeOpacity }}
-        className="absolute top-6 left-6 z-20 border-2 border-[#2D6A4F] text-[#2D6A4F] font-bold tracking-widest text-xl px-4 py-1.5 rounded-xl -rotate-12 bg-white/95 pointer-events-none"
+        className="absolute top-6 left-6 z-30 border-2 border-[#2D6A4F] text-[#2D6A4F] font-bold tracking-widest text-xl px-4 py-1.5 rounded-xl -rotate-12 bg-white/95 shadow-md pointer-events-none"
       >
         BEĞENDİM
       </motion.div>
@@ -168,59 +214,12 @@ export const VenueCard: React.FC<VenueCardProps> = ({
       {/* PASS STAMP (Paprika Red #D9381E) */}
       <motion.div
         style={{ opacity: passOpacity }}
-        className="absolute top-6 right-6 z-20 border-2 border-[#D9381E] text-[#D9381E] font-bold tracking-widest text-xl px-4 py-1.5 rounded-xl rotate-12 bg-white/95 pointer-events-none"
+        className="absolute top-6 right-6 z-30 border-2 border-[#D9381E] text-[#D9381E] font-bold tracking-widest text-xl px-4 py-1.5 rounded-xl rotate-12 bg-white/95 shadow-md pointer-events-none"
       >
         PAS
       </motion.div>
 
-      {/* Venue Photo */}
-      <div className="relative w-full h-3/5 bg-stone-100">
-        <img
-          src={venue.photoUrl || FALLBACK_IMAGE}
-          alt={venue.name}
-          draggable={false}
-          className="w-full h-full object-cover pointer-events-none"
-          onError={(e) => {
-            const img = e.currentTarget;
-            img.onerror = null;
-            img.src = FALLBACK_IMAGE;
-          }}
-        />
-      </div>
-
-      {/* Venue Editorial Information */}
-      <div className="p-5 flex flex-col justify-between h-2/5">
-        <div>
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-[#E07A5F] uppercase tracking-wider">
-              {venue.category}
-            </span>
-            <div className="flex items-center gap-1 bg-[#F5F0EB] px-2 py-0.5 rounded-lg text-xs font-bold text-[#1C1917]">
-              <Star className="w-3.5 h-3.5 fill-[#E07A5F] text-[#E07A5F]" />
-              <span>{venue.rating.toFixed(1)}</span>
-              <span className="text-[#78716C] font-normal">({venue.reviewCount})</span>
-            </div>
-          </div>
-          <h3 className="font-display font-bold text-2xl text-[#1C1917] mt-1.5 leading-snug tracking-tight line-clamp-1">
-            {venue.name}
-          </h3>
-          <div className="flex items-start gap-1 mt-1 text-xs text-[#78716C]">
-            <MapPin className="w-3.5 h-3.5 shrink-0 mt-0.5 text-[#78716C]" />
-            <p className="line-clamp-2">{venue.address}</p>
-          </div>
-        </div>
-
-        <div className="flex items-center justify-between pt-2 border-t border-[#E7E2D9] text-xs font-medium text-[#78716C]">
-          <span>Fiyat: {'₺'.repeat(venue.priceLevel || 2)}</span>
-          <span className={venue.isOpenNow ? 'text-[#2D6A4F] font-semibold' : 'text-[#78716C]'}>
-            {venue.isOpenNow !== undefined
-              ? venue.isOpenNow
-                ? '● Açık'
-                : '○ Kapalı'
-              : '● Açık'}
-          </span>
-        </div>
-      </div>
+      <CardBody venue={venue} />
     </motion.div>
   );
 };
