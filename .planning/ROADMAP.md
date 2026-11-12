@@ -13,6 +13,7 @@ DecideTogether, çiftlerin "Ne yesek?" kararsızlığını 10 saniyelik eğlence
 - [x] **Phase 5: Post-Match Navigation & Delivery Actions** - Google Maps navigasyon başlatma ve sipariş arama entegrasyonu.
 - [x] **Phase 6: Mobile UX, Swipe Physics & Location Navigation Polish**
 - [x] **Phase 7: Warm Editorial Minimal & Anti-AI-Slop Redesign**
+- [ ] **Phase 8: Engineering Architecture Hardening: Storage Repository, Atomic UI & CI/CD**
 
 ## Phase Details
 
@@ -77,7 +78,7 @@ Plans:
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
+Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
@@ -88,6 +89,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 | 5. Post-Match Navigation & Delivery Actions | 2/2 | Complete | 2026-11-11 |
 | 6. Mobile UX, Swipe Physics & Location Navigation Polish | 2/2 | Complete | 2026-11-11 |
 | 7. Warm Editorial Minimal & Anti-AI-Slop Redesign | 2/2 | Complete | 2026-11-11 |
+| 8. Engineering Architecture Hardening: Storage Repository, Atomic UI & CI/CD | 0/2 | Ready | — |
 
 ### Phase 7: Warm Editorial Minimal & Anti-AI-Slop Redesign
 
@@ -99,3 +101,14 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 Plans:
 - [x] 07-01-PLAN.md — Typography, Content Neutralization & Emoji Purge
 - [x] 07-02-PLAN.md — Climax Redesign, Framer Motion Physics & Duel Surface Refinement
+
+### Phase 8: Engineering Architecture Hardening: Storage Repository, Atomic UI & CI/CD
+
+**Goal:** Upgrade codebase from Vibe Coder shortcuts to resilient Software Engineering standards: decouple storage via IRoomRepository with native node:sqlite persistence, decompose monolithic UI components into atomic modules, add GitHub Actions CI automation, and implement structured logging with a /health endpoint.
+**Requirements:** ENG-01, ENG-02, ENG-03, ENG-04
+**Depends on:** Phase 7
+**Plans:** 2 plans
+
+Plans:
+- [ ] 08-01-PLAN.md — Storage Repository Pattern, Native SQLite Persistence, Structured Logging & Health Check
+- [ ] 08-02-PLAN.md — Atomic UI Component Decomposition & GitHub Actions CI Workflow
