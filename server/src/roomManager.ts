@@ -3,6 +3,8 @@ import { Room, Participant, ServerMessage, Venue } from './types.js';
 import { VenueService, isValidCoordinate } from './services/venueService.js';
 import { MOCK_DISTRICTS } from './services/mockVenues.js';
 import { duelEngine } from './services/duelEngine.js';
+import { IRoomRepository } from './repositories/roomRepository.js';
+import { SqliteRoomRepository } from './repositories/sqliteRoomRepository.js';
 
 const FOOD_NICKNAMES = [
   'Aç Panda',
@@ -21,10 +23,48 @@ interface ConnectedClient {
 }
 
 export class RoomManager {
-  private rooms: Map<string, Room> = new Map();
+  private repository: IRoomRepository;
   private clients: Map<WebSocket, ConnectedClient> = new Map();
   private disconnectTimeouts: Map<string, NodeJS.Timeout> = new Map();
   private venueService: VenueService = new VenueService();
+  private cleanupInterval?: NodeJS.Timeout;
+
+  constructor(repository: IRoomRepository = new SqliteRoomRepository()) {
+    this.repository = repository;
+
+    // Periodic cleanup of abandoned rooms (>24h TTL) every 30 minutes
+    this.cleanupInterval = setInterval(() => {
+      this.cleanupExpiredRooms();
+    }, 30 * 60 * 1000);
+    this.cleanupInterval.unref(); // Avoid holding Node process open
+  }
+
+  public cleanupExpiredRooms(maxAgeMs: number = 24 * 60 * 60 * 1000): number {
+    const count = this.repository.cleanupExpired(maxAgeMs);
+    if (count > 0) {
+      console.log(`[RoomManager] Cleaned up ${count} expired room(s)`);
+    }
+    return count;
+  }
+
+  public getActiveRoomCount(): number {
+    return this.repository.listActive().length;
+  }
+
+  public getRepository(): IRoomRepository {
+    return this.repository;
+  }
+
+  public destroy(): void {
+    if (this.cleanupInterval) {
+      clearInterval(this.cleanupInterval);
+      this.cleanupInterval = undefined;
+    }
+    for (const timeout of this.disconnectTimeouts.values()) {
+      clearTimeout(timeout);
+    }
+    this.disconnectTimeouts.clear();
+  }
 
   // Helper to generate a unique 4-digit PIN (1000 - 9999)
   public generateUniquePin(): string {
@@ -36,7 +76,7 @@ export class RoomManager {
       if (attempts > 9000) {
         throw new Error('No available room codes');
       }
-    } while (this.rooms.has(pin));
+    } while (this.repository.get(pin) !== null);
     return pin;
   }
 
@@ -80,7 +120,7 @@ export class RoomManager {
       venues: resolved.venues,
     };
 
-    this.rooms.set(code, room);
+    this.repository.save(room);
     this.clients.set(ws, { ws, userId: hostId, roomCode: code });
 
     console.log(`[RoomManager] Room created: PIN=${code}, Host=${host.nickname} (${hostId}), Loc=${resolved.location.label}, Venues=${resolved.venues.length}`);
@@ -102,9 +142,10 @@ export class RoomManager {
     existingUserId?: string,
     customNickname?: string
   ): { success: boolean; error?: string } {
-    const room = this.rooms.get(roomCode);
+    const room = this.repository.get(roomCode);
     if (!room) {
-      console.warn(`[RoomManager] Join failed: PIN=${roomCode} not found. Active rooms: [${Array.from(this.rooms.keys()).join(', ') || 'none'}]`);
+      const activePins = this.repository.listActive().map((r) => r.code).join(', ') || 'none';
+      console.warn(`[RoomManager] Join failed: PIN=${roomCode} not found. Active rooms: [${activePins}]`);
       this.sendTo(ws, { type: 'ERROR', message: 'Oda bulunamadı (Geçersiz PIN)' });
       return { success: false, error: 'Oda bulunamadı' };
     }
@@ -130,6 +171,8 @@ export class RoomManager {
 
       this.clients.set(ws, { ws, userId: existingUserId, roomCode });
       console.log(`[RoomManager] Participant reconnected: PIN=${roomCode}, User=${participant.nickname} (${existingUserId})`);
+
+      this.repository.save(room);
 
       // Notify this user
       this.sendTo(ws, {
@@ -195,6 +238,7 @@ export class RoomManager {
     room.participants[peerId] = peer;
     room.status = 'ready';
 
+    this.repository.save(room);
     this.clients.set(ws, { ws, userId: peerId, roomCode });
     console.log(`[RoomManager] Peer joined: PIN=${roomCode}, Peer=${peer.nickname} (${peerId}), Venues=${room.venues?.length || 0}`);
 
@@ -236,7 +280,7 @@ export class RoomManager {
       this.disconnectTimeouts.delete(timeoutKey);
     }
 
-    const room = this.rooms.get(roomCode);
+    const room = this.repository.get(roomCode);
     if (!room) return true;
 
     delete room.participants[userId];
@@ -249,7 +293,7 @@ export class RoomManager {
 
     const remainingIds = Object.keys(room.participants);
     if (remainingIds.length === 0) {
-      this.rooms.delete(roomCode);
+      this.repository.delete(roomCode);
       console.log(`[RoomManager] Room ${roomCode} closed (all participants left)`);
       return true;
     }
@@ -269,6 +313,8 @@ export class RoomManager {
     delete room.duelState;
     room.lastActiveAt = Date.now();
 
+    this.repository.save(room);
+
     this.broadcastToRoom(roomCode, {
       type: 'ROOM_STATE',
       room,
@@ -284,7 +330,7 @@ export class RoomManager {
 
     this.clients.delete(ws);
     const { roomCode, userId } = client;
-    const room = this.rooms.get(roomCode);
+    const room = this.repository.get(roomCode);
     if (!room) return;
 
     const participant = room.participants[userId];
@@ -292,6 +338,7 @@ export class RoomManager {
 
     participant.connected = false;
     participant.disconnectedAt = Date.now();
+    this.repository.save(room);
     const reconnectWindowMs = 30000;
 
     // Inform remaining peer that partner disconnected
@@ -305,7 +352,7 @@ export class RoomManager {
     const timeoutKey = `${roomCode}:${userId}`;
     const timeout = setTimeout(() => {
       this.disconnectTimeouts.delete(timeoutKey);
-      const currentRoom = this.rooms.get(roomCode);
+      const currentRoom = this.repository.get(roomCode);
       if (currentRoom) {
         const currentPart = currentRoom.participants[userId];
         if (currentPart && !currentPart.connected) {
@@ -319,7 +366,9 @@ export class RoomManager {
             if (currentRoom.duelState?.timer) {
               clearTimeout(currentRoom.duelState.timer);
             }
-            this.rooms.delete(roomCode);
+            this.repository.delete(roomCode);
+          } else {
+            this.repository.save(currentRoom);
           }
         }
       }
@@ -329,7 +378,7 @@ export class RoomManager {
   }
 
   public getRoom(code: string): Room | undefined {
-    return this.rooms.get(code);
+    return this.repository.get(code) ?? undefined;
   }
 
   public getVenueService(): VenueService {
@@ -339,12 +388,14 @@ export class RoomManager {
   public updateNickname(ws: WebSocket, newNickname: string): void {
     const client = this.clients.get(ws);
     if (!client) return;
-    const room = this.rooms.get(client.roomCode);
+    const room = this.repository.get(client.roomCode);
     if (!room) return;
     const participant = room.participants[client.userId];
     if (!participant) return;
 
     participant.nickname = newNickname.trim() || participant.nickname;
+    this.repository.save(room);
+
     this.broadcastToRoom(client.roomCode, {
       type: 'ROOM_STATE',
       room,
@@ -358,7 +409,8 @@ export class RoomManager {
   ): Promise<void> {
     const client = this.clients.get(ws);
     if (!client) return;
-    const room = this.rooms.get(client.roomCode);
+
+    const room = this.repository.get(client.roomCode);
     if (!room) return;
 
     // Whitelist districtId against known districts (T-02-03)
@@ -380,6 +432,8 @@ export class RoomManager {
     room.venues = resolved.venues;
     room.lastActiveAt = Date.now();
 
+    this.repository.save(room);
+
     // Broadcast updated ROOM_STATE to all room participants
     this.broadcastToRoom(client.roomCode, {
       type: 'ROOM_STATE',
@@ -391,7 +445,7 @@ export class RoomManager {
     const client = this.clients.get(ws);
     if (!client) return false;
 
-    const room = this.rooms.get(client.roomCode);
+    const room = this.repository.get(client.roomCode);
     if (!room) return false;
 
     // Swiping can only be started when room has at least 2 connected participants
@@ -409,6 +463,7 @@ export class RoomManager {
     if (!room.votes) room.votes = {};
     if (!room.progress) room.progress = {};
 
+    this.repository.save(room);
     console.log(`[RoomManager] Swiping started in room ${room.code} by user ${client.userId}`);
 
     // Broadcast to all participants that swiping has started
@@ -431,7 +486,7 @@ export class RoomManager {
     const client = this.clients.get(ws);
     if (!client) return {};
 
-    const room = this.rooms.get(client.roomCode);
+    const room = this.repository.get(client.roomCode);
     // 2. Reject swipes if room is not in swiping status (T-03-02)
     if (!room || room.status !== 'swiping') return {};
 
@@ -476,6 +531,7 @@ export class RoomManager {
           room.matchedVenue = winningVenue;
           room.lastActiveAt = Date.now();
 
+          this.repository.save(room);
           console.log(`[RoomManager] INSTANT MATCH in room ${room.code}: ${winningVenue.name} (${winningVenue.id})`);
 
           this.broadcastToRoom(room.code, {
@@ -499,6 +555,8 @@ export class RoomManager {
       if (allFinished && room.status === 'swiping') {
         room.status = 'duel';
         room.lastActiveAt = Date.now();
+        this.repository.save(room);
+
         console.log(`[RoomManager] Deck exhausted with NO match in room ${room.code}. Transitioning to DUEL.`);
 
         this.broadcastToRoom(room.code, {
@@ -509,6 +567,7 @@ export class RoomManager {
       }
     }
 
+    this.repository.save(room);
     return {};
   }
 
@@ -538,7 +597,7 @@ export class RoomManager {
     const client = this.clients.get(ws);
     if (!client) return false;
 
-    const room = this.rooms.get(client.roomCode);
+    const room = this.repository.get(client.roomCode);
     if (!room || room.status !== 'duel') return false;
 
     // Clear any existing duel timer if re-triggered
@@ -549,6 +608,7 @@ export class RoomManager {
     const participantIds = Object.keys(room.participants);
     const { duelState, startTime, durationMs, totalWaitMs } = duelEngine.initializeDuel(mode, participantIds);
     room.duelState = duelState;
+    this.repository.save(room);
 
     this.broadcastToRoom(room.code, {
       type: 'DUEL_STARTING',
@@ -569,13 +629,14 @@ export class RoomManager {
     const client = this.clients.get(ws);
     if (!client) return;
 
-    const room = this.rooms.get(client.roomCode);
+    const room = this.repository.get(client.roomCode);
     if (!room || !room.duelState || room.duelState.status === 'finished') return;
 
     const result = duelEngine.validateTap(room.duelState, client.userId, cumulativeTaps);
     if (!result.valid) return;
 
     room.duelState.scores[client.userId] = result.newScore;
+    this.repository.save(room);
 
     this.broadcastToRoom(room.code, {
       type: 'DUEL_PROGRESS',
@@ -585,7 +646,7 @@ export class RoomManager {
 
   // Authoritative duel conclusion and winner resolution (DUEL-04)
   public concludeDuel(roomCode: string, forcedWinnerId?: string): void {
-    const room = this.rooms.get(roomCode);
+    const room = this.repository.get(roomCode);
     if (!room || !room.duelState || room.duelState.status === 'finished') return;
 
     if (room.duelState.timer) {
@@ -597,13 +658,17 @@ export class RoomManager {
     const userIds = Object.keys(room.participants);
     const { winnerId, tieBroken } = duelEngine.determineWinner(room.duelState.scores, userIds, forcedWinnerId);
 
-    if (!winnerId) return;
+    if (!winnerId) {
+      this.repository.save(room);
+      return;
+    }
 
     const winningVenue = this.resolveDuelWinner(roomCode, winnerId);
     if (winningVenue) {
       room.status = 'matched';
       room.matchedVenue = winningVenue;
       room.lastActiveAt = Date.now();
+      this.repository.save(room);
 
       console.log(`[RoomManager] DUEL CONCLUDED in room ${room.code}. Winner: ${winnerId}, Venue: ${winningVenue.name}`);
 
@@ -616,12 +681,14 @@ export class RoomManager {
           tieBroken: tieBroken ? true : undefined,
         },
       });
+    } else {
+      this.repository.save(room);
     }
   }
 
   // Hierarchical winner venue resolution (D-04 / DUEL-04)
   public resolveDuelWinner(roomCode: string, winnerId: string): Venue | undefined {
-    const room = this.rooms.get(roomCode);
+    const room = this.repository.get(roomCode);
     if (!room || !room.venues || room.venues.length === 0) return undefined;
 
     return duelEngine.resolveWinningVenue(

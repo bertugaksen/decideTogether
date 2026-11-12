@@ -171,3 +171,33 @@ test('SqliteRoomRepository - cleanupExpired TTL removes abandoned rooms (T-08-02
 
   repo.close();
 });
+
+test('RoomManager - accepts injected IRoomRepository and runs expired room cleanup (ENG-01, T-08-02)', async () => {
+  const memoryRepo = new MemoryRoomRepository();
+  const { RoomManager } = await import('../roomManager.js');
+  const { WebSocket } = await import('ws');
+
+  const manager = new RoomManager(memoryRepo);
+  const mockWs = {
+    readyState: WebSocket.OPEN,
+    send: () => {},
+  } as unknown as import('ws').WebSocket;
+
+  const { room } = await manager.createRoom(mockWs, 'Injected Host');
+  assert.ok(room.code);
+  assert.equal(manager.getActiveRoomCount(), 1);
+
+  // Assert room was written directly into the injected memory repository
+  const storedInRepo = memoryRepo.get(room.code);
+  assert.ok(storedInRepo);
+  assert.equal(storedInRepo.code, room.code);
+
+  // Run cleanupExpiredRooms with negative maxAge to force TTL expiration
+  const cleanedCount = manager.cleanupExpiredRooms(-1000);
+  assert.equal(cleanedCount, 1);
+  assert.equal(manager.getActiveRoomCount(), 0);
+  assert.equal(memoryRepo.get(room.code), null);
+
+  manager.destroy();
+});
+

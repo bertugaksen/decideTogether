@@ -4,6 +4,7 @@ import { IRoomRepository } from './roomRepository.js';
 
 export class SqliteRoomRepository implements IRoomRepository {
   private db: DatabaseSync;
+  private cache: Map<string, Room> = new Map();
   private getStmt: StatementSync;
   private saveStmt: StatementSync;
   private deleteStmt: StatementSync;
@@ -12,6 +13,14 @@ export class SqliteRoomRepository implements IRoomRepository {
 
   constructor(dbPath: string = './decidetogether.db') {
     this.db = new DatabaseSync(dbPath);
+
+    // Concurrency and write-ahead log tuning
+    try {
+      this.db.exec('PRAGMA journal_mode = WAL;');
+      this.db.exec('PRAGMA busy_timeout = 5000;');
+    } catch {
+      // WAL / busy_timeout may not apply to all SQLite modes (e.g., in-memory)
+    }
 
     // Initialize rooms schema with updatedAt index for fast TTL cleanup
     this.db.exec(`
@@ -33,39 +42,55 @@ export class SqliteRoomRepository implements IRoomRepository {
         updatedAt = excluded.updatedAt
     `);
     this.deleteStmt = this.db.prepare('DELETE FROM rooms WHERE code = ?');
-    this.listStmt = this.db.prepare('SELECT data FROM rooms');
+    this.listStmt = this.db.prepare('SELECT code, data FROM rooms');
     this.cleanupStmt = this.db.prepare('DELETE FROM rooms WHERE updatedAt < ?');
   }
 
   public get(code: string): Room | null {
+    if (this.cache.has(code)) {
+      return this.cache.get(code)!;
+    }
+
     const row = this.getStmt.get(code) as { data: string } | undefined;
     if (!row || !row.data) {
       return null;
     }
     try {
-      return JSON.parse(row.data) as Room;
+      const room = JSON.parse(row.data) as Room;
+      this.cache.set(code, room);
+      return room;
     } catch {
       return null;
     }
   }
 
   public save(room: Room): void {
-    const serialized = JSON.stringify(room);
+    this.cache.set(room.code, room);
+    // Exclude circular Node Timeout objects if present in duelState
+    const serialized = JSON.stringify(room, (key, value) => (key === 'timer' ? undefined : value));
     const updatedAt = Date.now();
     this.saveStmt.run(room.code, serialized, updatedAt);
   }
 
   public delete(code: string): void {
+    this.cache.delete(code);
     this.deleteStmt.run(code);
   }
 
   public listActive(): Room[] {
-    const rows = this.listStmt.all() as Array<{ data: string }>;
+    const rows = this.listStmt.all() as Array<{ code: string; data: string }>;
     const activeRooms: Room[] = [];
     for (const row of rows) {
       if (row && row.data) {
         try {
-          activeRooms.push(JSON.parse(row.data) as Room);
+          const cached = this.cache.get(row.code);
+          if (cached) {
+            activeRooms.push(cached);
+          } else {
+            const room = JSON.parse(row.data) as Room;
+            this.cache.set(room.code, room);
+            activeRooms.push(room);
+          }
         } catch {
           // Skip corrupted rows safely
         }
@@ -77,10 +102,22 @@ export class SqliteRoomRepository implements IRoomRepository {
   public cleanupExpired(maxAgeMs: number): number {
     const threshold = Date.now() - maxAgeMs;
     const res = this.cleanupStmt.run(threshold) as { changes: number | bigint };
-    return Number(res.changes);
+    const count = Number(res.changes);
+    if (count > 0) {
+      // Evict deleted codes from in-memory cache
+      const rows = this.listStmt.all() as Array<{ code: string }>;
+      const activeCodes = new Set(rows.map((r) => r.code));
+      for (const code of this.cache.keys()) {
+        if (!activeCodes.has(code)) {
+          this.cache.delete(code);
+        }
+      }
+    }
+    return count;
   }
 
   public close(): void {
+    this.cache.clear();
     this.db.close();
   }
 }
