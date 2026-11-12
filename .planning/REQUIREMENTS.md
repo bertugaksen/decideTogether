@@ -57,8 +57,8 @@
 ### Engineering Architecture Hardening (ENG)
 
 - [x] **ENG-01**: Pluggable storage repository (`IRoomRepository`) decoupling in-memory state from business logic, with native `node:sqlite` persistence for zero-data-loss server reboots.
-- [ ] **ENG-02**: Atomic UI component refactoring: decompose monolithic `Lobby.tsx` and `MatchCelebration.tsx` into clean, testable sub-components in `components/lobby/` and `components/celebration/`.
-- [ ] **ENG-03**: Automated GitHub Actions CI workflow (`.github/workflows/ci.yml`) enforcing TypeScript builds and server test verification on push/PR.
+- [x] **ENG-02**: Atomic UI component refactoring: decompose monolithic `Lobby.tsx` and `MatchCelebration.tsx` into clean, testable sub-components in `components/lobby/` and `components/celebration/`.
+- [x] **ENG-03**: Automated GitHub Actions CI workflow (`.github/workflows/ci.yml`) enforcing TypeScript builds and server test verification on push/PR.
 - [x] **ENG-04**: Structured logging utility (`logger.ts`) with severity levels and correlation IDs, plus `GET /health` endpoint for production uptime monitors.
 
 ## Traceability
@@ -94,11 +94,11 @@
 | EDIT-05 | Phase 7 | Complete |
 | EDIT-06 | Phase 7 | Complete |
 | ENG-01 | Phase 8 | Complete |
-| ENG-02 | Phase 8 | Pending |
-| ENG-03 | Phase 8 | Pending |
+| ENG-02 | Phase 8 | Complete |
+| ENG-03 | Phase 8 | Complete |
 | ENG-04 | Phase 8 | Complete |
 
 **Coverage:**
 - v1 requirements: 22 total (22/22 complete)
 - Phase 7 requirements: 6 total (6/6 complete)
-- Phase 8 requirements: 4 total (2/4 complete)
+- Phase 8 requirements: 4 total (4/4 complete)
