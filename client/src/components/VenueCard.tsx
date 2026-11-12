@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { motion, useAnimationControls, useMotionValue, useTransform } from 'framer-motion';
 import { Star, MapPin } from 'lucide-react';
-import { Venue } from '../types.js';
+import { Venue, getSmartFoodPhoto } from '../types.js';
 
 interface VenueCardProps {
   venue: Venue;
@@ -9,9 +9,6 @@ interface VenueCardProps {
   isTop: boolean;
   triggerSwipe?: 'like' | 'pass' | null;
 }
-
-const FALLBACK_IMAGE =
-  'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=800&q=80';
 
 const getDistanceText = (venue: Venue): string => {
   if (venue.distanceKm !== undefined && venue.distanceKm !== null) {
@@ -36,20 +33,21 @@ const formatReviewCount = (count: number): string => {
 
 const CardBody: React.FC<{ venue: Venue }> = ({ venue }) => {
   const distanceText = getDistanceText(venue);
+  const smartFallback = getSmartFoodPhoto(venue.category, venue.name, venue.id);
 
   return (
     <>
       {/* 78% Food-First Photo Container */}
       <div className="relative w-full h-[78%] bg-stone-900 overflow-hidden">
         <img
-          src={venue.photoUrl || FALLBACK_IMAGE}
+          src={venue.photoUrl || smartFallback}
           alt={venue.name}
           draggable={false}
           className="w-full h-full object-cover pointer-events-none"
           onError={(e) => {
             const img = e.currentTarget;
             img.onerror = null;
-            img.src = FALLBACK_IMAGE;
+            img.src = smartFallback;
           }}
         />
 

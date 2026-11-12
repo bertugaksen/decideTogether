@@ -1,4 +1,4 @@
-import { Venue, District, RoomLocation, cleanTurkishVenueName } from '../types.js';
+import { Venue, District, RoomLocation, cleanTurkishVenueName, getSmartFoodPhoto, classifyCuisineText } from '../types.js';
 import { VenueCache, getCoordinateCacheKey } from './venueCache.js';
 import { MOCK_DISTRICTS, MOCK_VENUES } from './mockVenues.js';
 import {
@@ -77,80 +77,11 @@ export function formatCategoryName(rawType?: string): string {
  * Classifies a venue into a broad culinary category for deck diversity interleaving.
  */
 export function categorizeVenue(venue: Venue): string {
-  const cat = (venue.category || '').toLowerCase();
-  const name = (venue.name || '').toLowerCase();
-  const text = `${cat} ${name}`;
+  return classifyCuisineText(venue.category, venue.name);
+}
 
-  if (
-    text.includes('kebab') ||
-    text.includes('kebap') ||
-    text.includes('ciğer') ||
-    text.includes('döner') ||
-    text.includes('ocakbaşı') ||
-    text.includes('köfte') ||
-    text.includes('steak')
-  ) {
-    return 'kebap_et';
-  }
-
-  if (
-    text.includes('burger') ||
-    text.includes('fast food') ||
-    text.includes('chicken') ||
-    text.includes('tavuk') ||
-    text.includes('sandviç') ||
-    text.includes('büfe') ||
-    text.includes('tost')
-  ) {
-    return 'burger_fast';
-  }
-
-  if (
-    text.includes('pizza') ||
-    text.includes('makarna') ||
-    text.includes('pasta') ||
-    text.includes('italy') ||
-    text.includes('ital') ||
-    text.includes('say cheese')
-  ) {
-    return 'pizza_italyan';
-  }
-
-  if (
-    text.includes('tatlı') ||
-    text.includes('pastane') ||
-    text.includes('kahve') ||
-    text.includes('coffee') ||
-    text.includes('cafe') ||
-    text.includes('kafe') ||
-    text.includes('chocolate') ||
-    text.includes('çikolata') ||
-    text.includes('bakery') ||
-    text.includes('fırın') ||
-    text.includes('breakfast') ||
-    text.includes('kahvaltı') ||
-    text.includes('brekkie') ||
-    text.includes('nata')
-  ) {
-    return 'cafe_tatli';
-  }
-
-  if (
-    text.includes('türk') ||
-    text.includes('ev yemeği') ||
-    text.includes('lokanta') ||
-    text.includes('çorba') ||
-    text.includes('pide') ||
-    text.includes('lahmacun') ||
-    text.includes('sofra') ||
-    text.includes('sokak') ||
-    text.includes('şırdan') ||
-    text.includes('kokoreç')
-  ) {
-    return 'geleneksel_ev';
-  }
-
-  return 'dunya_diger';
+export function classifyCuisine(venue: Venue): string {
+  return classifyCuisineText(venue.category, venue.name);
 }
 
 /**
@@ -160,7 +91,7 @@ export function categorizeVenue(venue: Venue): string {
 export function balanceDeckDiversity(venues: Venue[], targetCount = 15): Venue[] {
   if (venues.length <= 1) return venues;
 
-  // Filter out non-food venues (e.g. concert hall, department store, hotel)
+  // Filter out non-food venues (e.g. concert hall, department store, hotel, AVM)
   const nonFoodKeywords = [
     'concert hall',
     'department store',
@@ -175,13 +106,25 @@ export function balanceDeckDiversity(venues: Venue[], targetCount = 15): Venue[]
     'organization',
     'guest house',
     'resort',
+    'alışveriş merkezi',
+    'alisveris merkezi',
+    'avm',
+    'mağaza',
+    'magaza',
+    'süpermarket',
+    'supermarket',
+    'bakkal',
+    'giyim',
+    'çetinkaya',
+    'cetinkaya',
   ];
   const foodVenues = venues.filter((v) => {
     const cat = (v.category || '').toLowerCase();
-    return !nonFoodKeywords.some((kw) => cat.includes(kw));
+    const name = (v.name || '').toLowerCase();
+    return !nonFoodKeywords.some((kw) => cat.includes(kw) || name.includes(kw));
   });
 
-  const pool = foodVenues.length >= 8 ? foodVenues : venues;
+  const pool = foodVenues.length > 0 ? foodVenues : venues;
 
   // Group by category label
   const buckets: Record<string, Venue[]> = {};
@@ -337,19 +280,61 @@ export async function fetchGooglePlacesNearby(
       return [];
     }
 
-    return data.places.map((p: any): Venue => {
+    const NON_FOOD_PRIMARY_TYPES = new Set([
+      'department_store',
+      'shopping_mall',
+      'supermarket',
+      'grocery_store',
+      'clothing_store',
+      'home_goods_store',
+      'convenience_store',
+      'gas_station',
+      'electronics_store',
+      'store',
+    ]);
+
+    const NON_FOOD_TEXT = [
+      'alışveriş merkezi',
+      'alisveris merkezi',
+      'avm',
+      'mağaza',
+      'magaza',
+      'süpermarket',
+      'supermarket',
+      'bakkal',
+      'giyim',
+      'çetinkaya',
+      'cetinkaya',
+    ];
+
+    const foodPlaces = data.places.filter((p: any) => {
+      if (p.primaryType && NON_FOOD_PRIMARY_TYPES.has(p.primaryType)) return false;
+      const typeText = (p.primaryTypeDisplayName?.text || '').toLowerCase();
+      const nameText = (p.displayName?.text || '').toLowerCase();
+      if (NON_FOOD_TEXT.some((kw) => typeText.includes(kw) || nameText.includes(kw))) {
+        return false;
+      }
+      return true;
+    });
+
+    return foodPlaces.map((p: any): Venue => {
       const firstPhotoName = p.photos?.[0]?.name;
+      const category = formatCategoryName(p.primaryTypeDisplayName?.text);
+      const name = cleanTurkishVenueName(p.displayName?.text) || 'Bilinmeyen Restoran';
+      const venueId = `gplace_${p.id}`;
+
+      // Smart category photo when Google has no photo, or proxy URL with fallback hints
       const photoUrl = firstPhotoName
-        ? `/api/venues/photo?name=${encodeURIComponent(firstPhotoName)}`
-        : FALLBACK_PHOTO_URL;
+        ? `/api/venues/photo?name=${encodeURIComponent(firstPhotoName)}&cat=${encodeURIComponent(category)}&title=${encodeURIComponent(name)}`
+        : getSmartFoodPhoto(category, name, venueId);
 
       const venueLat = p.location?.latitude || lat;
       const venueLng = p.location?.longitude || lng;
 
       const baseVenue: Venue = {
-        id: `gplace_${p.id}`,
-        name: cleanTurkishVenueName(p.displayName?.text) || 'Bilinmeyen Restoran',
-        category: formatCategoryName(p.primaryTypeDisplayName?.text),
+        id: venueId,
+        name,
+        category,
         rating: typeof p.rating === 'number' ? p.rating : 4.5,
         reviewCount: typeof p.userRatingCount === 'number' ? p.userRatingCount : 100,
         priceLevel: mapPriceLevel(p.priceLevel),

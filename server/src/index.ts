@@ -7,6 +7,7 @@ import { RoomManager } from './roomManager.js';
 import { ClientMessage } from './types.js';
 import { MOCK_DISTRICTS } from './services/mockVenues.js';
 import { isValidCoordinate } from './services/venueService.js';
+import { getSmartFoodPhoto } from '@decidetogether/shared';
 import { logger } from './logger.js';
 
 const app = express();
@@ -67,8 +68,10 @@ const VALID_PHOTO_NAME_REGEX = /^places\/[A-Za-z0-9_-]+\/photos\/[A-Za-z0-9_-]+$
 
 app.get('/api/venues/photo', async (req, res) => {
   const photoName = req.query.name as string;
+  const category = (req.query.cat as string) || '';
+  const title = (req.query.title as string) || '';
   const apiKey = process.env.GOOGLE_PLACES_API_KEY;
-  const fallbackUrl = 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=800&q=80';
+  const fallbackUrl = getSmartFoodPhoto(category, title, photoName);
 
   if (!photoName || !VALID_PHOTO_NAME_REGEX.test(photoName) || !apiKey) {
     return res.redirect(fallbackUrl);
