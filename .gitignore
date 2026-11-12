@@ -10,3 +10,7 @@ shared/dist/
 *.env
 *.env.*
 *api*key*
+*.db
+*.db-journal
+*.db-wal
+*.sqlite
