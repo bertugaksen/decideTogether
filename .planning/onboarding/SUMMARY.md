@@ -7,10 +7,10 @@
 - STATE.md: present
 
 ## Codebase Context
-- Brownfield repo: no
-- Map readiness: none
-- Codebase map: missing
-- Fast map available: no
+- Brownfield repo: yes
+- Map readiness: complete
+- Codebase map: .planning/codebase/ (complete codebase map)
+- Fast map available: yes
 
 ## Docs Context
 - Existing ADR/PRD/SPEC/RFC candidates: 0
