@@ -37,31 +37,31 @@ Verification was performed in the main checkout with `workflow.use_worktrees: fa
 **Commit:** `c7b93df`  
 **Applied fix:** Tracked `initiatorId` in `duelState` and `DUEL_STARTING` broadcast. Enforced on the server that only the initiator's socket can submit `RESOLVE_SPLIT_DUEL`. On non-initiator client devices, rendered a dedicated waiting screen informing the partner to play on the initiating phone.
 
-### CR-03: Security Authorization Bypass: Clients Can Send RESOLVE_SPLIT_DUEL to Forcibly Hijack and Conclude Online Duels
+### CR-03: Security Authorization Bypass: Clients Can Send `RESOLVE_SPLIT_DUEL` to Forcibly Hijack and Conclude Online Duels
 
 **Files modified:** `server/src/index.ts`  
 **Commit:** `b93383e`  
 **Applied fix:** Added validation requiring `room.status === 'duel' && room.duelState?.mode === 'split' && room.duelState.status !== 'finished'` before processing `RESOLVE_SPLIT_DUEL`.
 
-### WR-01: OnlineDuelView Countdown and Sync Interval Timers Re-execute on Every Opponent Tap Due to Unmemoized Inline Callbacks
+### WR-01: `OnlineDuelView` Countdown and Sync Interval Timers Re-execute on Every Opponent Tap Due to Unmemoized Inline Callbacks
 
 **Files modified:** `client/src/components/OnlineDuelView.tsx`, `client/src/components/SwipeDeck.tsx`  
 **Commit:** `de8e368`  
 **Applied fix:** Memoized callbacks in `SwipeDeck.tsx` and used mutable `useRef` hooks for callback handlers inside `OnlineDuelView.tsx` to prevent interval tear-down and restarts during active duels.
 
-### WR-02: Missing Hydration of duelState on Reconnection / Reload Wipes Out Active Duel and Erases Winner Badge in Celebration View
+### WR-02: Missing Hydration of `duelState` on Reconnection / Reload Wipes Out Active Duel and Erases Winner Badge in Celebration View
 
 **Files modified:** `client/src/hooks/useRoomSocket.ts`  
 **Commit:** `a00fb0e`  
 **Applied fix:** Hydrated `duelState` from `message.room.duelState` in both `ROOM_JOINED` and `ROOM_STATE` handlers.
 
-### WR-03: Missing Finite Number and NaN Sanitization on DUEL_TAP Taps Allows Duel State and Score Corruption
+### WR-03: Missing Finite Number and NaN Sanitization on `DUEL_TAP` Taps Allows Duel State and Score Corruption
 
 **Files modified:** `server/src/index.ts`, `server/src/roomManager.ts`, `server/src/services/duelEngine.ts`  
 **Commit:** `840ffac`  
 **Applied fix:** Sanitized and clamped incoming tap numbers to finite non-negative integers in `index.ts`, `recordDuelTap`, and `duelEngine.validateTap`.
 
-### WR-04: Impure React State Updater in DuelCountdown Causes Double Audio Playback and Leaked Timeout References
+### WR-04: Impure React State Updater in `DuelCountdown` Causes Double Audio Playback and Leaked Timeout References
 
 **Files modified:** `client/src/components/DuelCountdown.tsx`  
 **Commit:** `569088a`  
