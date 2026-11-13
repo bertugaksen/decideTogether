@@ -202,6 +202,7 @@ export function useRoomSocket() {
               durationMs: message.durationMs,
               mode: message.mode,
               scores: {},
+              initiatorId: message.initiatorId,
             });
             break;
 

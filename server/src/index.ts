@@ -175,6 +175,10 @@ wss.on('connection', (ws: WebSocket) => {
           if (clientInfo) {
             const room = roomManager.getRoom(clientInfo.roomCode);
             if (room) {
+              if (room.duelState?.mode === 'split' && room.duelState.initiatorId && room.duelState.initiatorId !== clientInfo.userId) {
+                logger.warn('Ignoring RESOLVE_SPLIT_DUEL from non-initiator client', { userId: clientInfo.userId });
+                break;
+              }
               const p1Score = Math.max(0, Math.min(300, Number(message.scores?.p1) || 0));
               const p2Score = Math.max(0, Math.min(300, Number(message.scores?.p2) || 0));
               if (room.duelState) {

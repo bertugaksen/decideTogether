@@ -80,6 +80,7 @@ export interface DuelState {
   timer?: NodeJS.Timeout;
   winnerId?: string;
   tieBroken?: boolean;
+  initiatorId?: string;
 }
 
 // Client -> Server Message Types
@@ -141,6 +142,7 @@ export type ServerMessage =
       startTime: number;
       durationMs: number;
       mode: 'online' | 'split';
+      initiatorId?: string;
     }
   | {
       type: 'DUEL_PROGRESS';

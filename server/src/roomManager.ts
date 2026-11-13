@@ -607,7 +607,10 @@ export class RoomManager {
 
     const participantIds = Object.keys(room.participants);
     const { duelState, startTime, durationMs, totalWaitMs } = duelEngine.initializeDuel(mode, participantIds);
-    room.duelState = duelState;
+    room.duelState = {
+      ...duelState,
+      initiatorId: client.userId,
+    };
     this.repository.save(room);
 
     this.broadcastToRoom(room.code, {
@@ -615,6 +618,7 @@ export class RoomManager {
       startTime,
       durationMs,
       mode,
+      initiatorId: client.userId,
     });
 
     room.duelState.timer = setTimeout(() => {

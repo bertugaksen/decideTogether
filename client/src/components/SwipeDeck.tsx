@@ -89,6 +89,22 @@ export const SwipeDeck: React.FC<SwipeDeckProps> = ({
 
   // 1. If duel active and not finished, render RapidTapperDuel orchestrator
   if (duelState && duelState.status !== 'finished') {
+    if (duelState.mode === 'split' && duelState.initiatorId && currentUser.id !== duelState.initiatorId) {
+      return (
+        <div className="max-w-md mx-auto h-[100dvh] px-6 py-8 flex flex-col items-center justify-center select-none text-center bg-[#FBF9F5]">
+          <div className="w-16 h-16 mb-4 rounded-full bg-amber-100 flex items-center justify-center text-3xl animate-pulse">
+            📱
+          </div>
+          <h2 className="text-xl font-bold text-stone-800 mb-2 font-display">
+            Tek Telefondan Düello Başlatıldı!
+          </h2>
+          <p className="text-stone-600 text-sm leading-relaxed max-w-xs">
+            Partneriniz tek telefondan yan yana düello başlattı. Lütfen partnerinizin telefonundan birlikte oynayın!
+          </p>
+        </div>
+      );
+    }
+
     const opponentId = peer?.id;
     const opponentScore = opponentId && duelState.scores ? duelState.scores[opponentId] || 0 : 0;
 
