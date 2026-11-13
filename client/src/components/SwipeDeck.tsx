@@ -87,6 +87,20 @@ export const SwipeDeck: React.FC<SwipeDeckProps> = ({
     [currentIndex, onSwipe, venues]
   );
 
+  const handleOnlineFinish = useCallback(() => {}, []);
+  const handleSendTapBatch = useCallback(
+    (taps: number) => {
+      onSendDuelTap?.(taps);
+    },
+    [onSendDuelTap]
+  );
+  const handleSplitComplete = useCallback(
+    (winnerRole: 'p1' | 'p2', scores: { p1: number; p2: number }) => {
+      onResolveSplitDuel?.(winnerRole, scores);
+    },
+    [onResolveSplitDuel]
+  );
+
   // 1. If duel active and not finished, render RapidTapperDuel orchestrator
   if (duelState && duelState.status !== 'finished') {
     if (duelState.mode === 'split' && duelState.initiatorId && currentUser.id !== duelState.initiatorId) {
@@ -116,9 +130,9 @@ export const SwipeDeck: React.FC<SwipeDeckProps> = ({
         currentUser={currentUser}
         peer={peer}
         opponentScore={opponentScore}
-        onSendTapBatch={(taps) => onSendDuelTap?.(taps)}
-        onSplitComplete={(winnerRole, scores) => onResolveSplitDuel?.(winnerRole, scores)}
-        onOnlineFinish={() => {}}
+        onSendTapBatch={handleSendTapBatch}
+        onSplitComplete={handleSplitComplete}
+        onOnlineFinish={handleOnlineFinish}
       />
     );
   }

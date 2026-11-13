@@ -50,16 +50,26 @@ export const OnlineDuelView: React.FC<OnlineDuelViewProps> = ({
   }, []);
 
   // 2. Batched WebSocket cumulative sync (every 80ms)
+  const onSendTapBatchRef = useRef(onSendTapBatch);
+  useEffect(() => {
+    onSendTapBatchRef.current = onSendTapBatch;
+  }, [onSendTapBatch]);
+
+  const onDuelFinishRef = useRef(onDuelFinish);
+  useEffect(() => {
+    onDuelFinishRef.current = onDuelFinish;
+  }, [onDuelFinish]);
+
   useEffect(() => {
     const batchTimer = setInterval(() => {
       if (localTapsRef.current > lastSentTapsRef.current) {
         lastSentTapsRef.current = localTapsRef.current;
-        onSendTapBatch(localTapsRef.current);
+        onSendTapBatchRef.current(localTapsRef.current);
       }
     }, 80);
 
     return () => clearInterval(batchTimer);
-  }, [onSendTapBatch]);
+  }, []);
 
   // 3. 60fps Millisecond timer countdown synchronized with duel startTime
   useEffect(() => {
@@ -74,14 +84,15 @@ export const OnlineDuelView: React.FC<OnlineDuelViewProps> = ({
         soundEffects.playBuzzer();
         // Flush remaining taps immediately
         if (localTapsRef.current > lastSentTapsRef.current) {
-          onSendTapBatch(localTapsRef.current);
+          lastSentTapsRef.current = localTapsRef.current;
+          onSendTapBatchRef.current(localTapsRef.current);
         }
-        onDuelFinish();
+        onDuelFinishRef.current();
       }
     }, 30);
 
     return () => clearInterval(timer);
-  }, [durationMs, startTime, onDuelFinish, onSendTapBatch]);
+  }, [durationMs, startTime]);
 
   const timerPercent = (timeLeftMs / durationMs) * 100;
 
