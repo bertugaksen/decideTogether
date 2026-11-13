@@ -136,6 +136,9 @@ export function useRoomSocket() {
             if (message.room.matchedVenue) {
               setMatchedVenue(message.room.matchedVenue);
             }
+            if (message.room.duelState) {
+              setDuelState(message.room.duelState);
+            }
             if (message.room.status === 'duel') {
               setIsDeckExhausted(true);
             }
@@ -148,6 +151,9 @@ export function useRoomSocket() {
               setMatchedVenue(message.room.matchedVenue);
             } else {
               setMatchedVenue(null);
+            }
+            if (message.room.duelState) {
+              setDuelState(message.room.duelState);
             }
             if (message.room.status === 'duel') {
               setIsDeckExhausted(true);
