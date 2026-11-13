@@ -42,7 +42,10 @@ export class DuelEngine {
       scores: initialScores,
     };
 
-    const totalWaitMs = countdownMs + durationMs + gracePeriodMs;
+    const totalWaitMs =
+      mode === 'split'
+        ? countdownMs + durationMs + 15000 // 15s grace for split mode client submission
+        : countdownMs + durationMs + gracePeriodMs;
     return { duelState, startTime, durationMs, totalWaitMs };
   }
 
