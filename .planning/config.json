@@ -22,6 +22,7 @@
     "quick_branch_template": null
   },
   "workflow": {
+    "use_worktrees": false,
     "research": true,
     "plan_check": true,
     "verifier": true,
@@ -67,5 +68,8 @@
     "source_grounding": true,
     "source_grounding_authority": "grep"
   },
-  "resolve_model_ids": "omit"
+  "resolve_model_ids": "omit",
+  "graphify": {
+    "enabled": true
+  }
 }
