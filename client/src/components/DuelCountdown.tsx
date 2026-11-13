@@ -13,24 +13,24 @@ export const DuelCountdown: React.FC<DuelCountdownProps> = ({ onComplete }) => {
     soundEffects.initOnUserGesture();
     soundEffects.playCountdownTick();
 
+    let currentStep = 3;
     let completeTimeout: ReturnType<typeof setTimeout> | null = null;
 
     const interval = setInterval(() => {
-      setStep((prev) => {
-        if (prev === 1) {
-          soundEffects.playStartFanfare();
-          completeTimeout = setTimeout(() => {
-            onComplete();
-          }, 300);
-          return 0; // "Başla"
-        }
-        if (prev <= 0) {
-          clearInterval(interval);
-          return -1;
-        }
+      currentStep -= 1;
+      if (currentStep === 0) {
+        setStep(0);
+        soundEffects.playStartFanfare();
+        completeTimeout = setTimeout(() => {
+          onComplete();
+        }, 300);
+      } else if (currentStep < 0) {
+        clearInterval(interval);
+        setStep(-1);
+      } else {
+        setStep(currentStep);
         soundEffects.playCountdownTick();
-        return prev - 1;
-      });
+      }
     }, 1000);
 
     return () => {
