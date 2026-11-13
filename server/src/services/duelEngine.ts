@@ -58,6 +58,11 @@ export class DuelEngine {
     cumulativeTaps: number,
     now: number = Date.now()
   ): TapValidationResult {
+    // Sanitization: reject non-finite or negative tap values
+    if (typeof cumulativeTaps !== 'number' || !Number.isFinite(cumulativeTaps) || cumulativeTaps < 0) {
+      return { valid: false, newScore: duelState.scores[userId] || 0 };
+    }
+
     // Timing boundary: taps only valid between startTime and (startTime + durationMs + 400ms grace)
     if (now < duelState.startTime || now > duelState.startTime + duelState.durationMs + 400) {
       return { valid: false, newScore: duelState.scores[userId] || 0 };

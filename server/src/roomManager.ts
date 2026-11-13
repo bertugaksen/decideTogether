@@ -630,6 +630,8 @@ export class RoomManager {
 
   // Record incoming cumulative taps with timing boundary check and anti-cheat clamp (DUEL-02, T-04-02, T-04-03)
   public recordDuelTap(ws: WebSocket, cumulativeTaps: number): void {
+    if (!Number.isFinite(cumulativeTaps) || cumulativeTaps < 0) return;
+
     const client = this.clients.get(ws);
     if (!client) return;
 

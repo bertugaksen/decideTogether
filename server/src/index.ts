@@ -166,9 +166,13 @@ wss.on('connection', (ws: WebSocket) => {
           roomManager.startDuel(ws, message.mode);
           break;
 
-        case 'DUEL_TAP':
-          roomManager.recordDuelTap(ws, message.taps);
+        case 'DUEL_TAP': {
+          const taps = Number(message.taps);
+          if (Number.isFinite(taps) && taps >= 0) {
+            roomManager.recordDuelTap(ws, Math.floor(taps));
+          }
           break;
+        }
 
         case 'RESOLVE_SPLIT_DUEL': {
           const clientInfo = roomManager.getClientInfo(ws);
