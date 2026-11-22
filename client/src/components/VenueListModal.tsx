@@ -1,6 +1,6 @@
 import React from 'react';
 import { X, Star, MapPin, UtensilsCrossed } from 'lucide-react';
-import { Venue } from '../types.js';
+import { Venue, getSmartFoodPhoto } from '../types.js';
 
 interface VenueListModalProps {
   isOpen: boolean;
@@ -58,27 +58,28 @@ export const VenueListModal: React.FC<VenueListModalProps> = ({
               Henüz mekan yüklenmedi.
             </div>
           ) : (
-            venues.map((venue, idx) => (
-              <div
-                key={venue.id || idx}
-                className="p-3.5 rounded-xl border border-[#E7E2D9] bg-white hover:border-[#D0C9BD] transition-all"
-              >
-                <div className="flex items-start gap-3">
-                  {/* Photo or placeholder */}
-                  <div className="w-16 h-16 rounded-lg bg-[#F5F0EB] overflow-hidden shrink-0 border border-[#E7E2D9]">
-                    <img
-                      src={venue.photoUrl}
-                      alt={venue.name}
-                      className="w-full h-full object-cover"
-                      loading="lazy"
-                      onError={(e) => {
-                        const img = e.currentTarget;
-                        img.onerror = null;
-                        img.src =
-                          'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=400&q=80';
-                      }}
-                    />
-                  </div>
+            venues.map((venue, idx) => {
+              const smartFallback = getSmartFoodPhoto(venue.category, venue.name, venue.id);
+              return (
+                <div
+                  key={venue.id || idx}
+                  className="p-3.5 rounded-xl border border-[#E7E2D9] bg-white hover:border-[#D0C9BD] transition-all"
+                >
+                  <div className="flex items-start gap-3">
+                    {/* Photo or placeholder */}
+                    <div className="w-16 h-16 rounded-lg bg-[#F5F0EB] overflow-hidden shrink-0 border border-[#E7E2D9]">
+                      <img
+                        src={venue.photoUrl || smartFallback}
+                        alt={venue.name}
+                        className="w-full h-full object-cover"
+                        loading="lazy"
+                        onError={(e) => {
+                          const img = e.currentTarget;
+                          img.onerror = null;
+                          img.src = smartFallback;
+                        }}
+                      />
+                    </div>
 
                   {/* Details */}
                   <div className="flex-1 min-w-0">
@@ -132,7 +133,8 @@ export const VenueListModal: React.FC<VenueListModalProps> = ({
                   </div>
                 </div>
               </div>
-            ))
+            );
+          })
           )}
         </div>
 

@@ -8,7 +8,6 @@ import {
 } from './actionLinks.js';
 
 const GOOGLE_PLACES_NEARBY_URL = 'https://places.googleapis.com/v1/places:searchNearby';
-const FALLBACK_PHOTO_URL = 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=800&q=80';
 
 /**
  * Validates coordinate numbers strictly within geographic bounds (T-02-04).

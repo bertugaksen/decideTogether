@@ -1,10 +1,7 @@
 import React from 'react';
 import { Star, MapPin } from 'lucide-react';
-import { Venue, RoomLocation } from '../../types.js';
+import { Venue, RoomLocation, getSmartFoodPhoto } from '../../types.js';
 import { formatPriceTier, calculateDistanceKm } from '../../utils/actionLinks.js';
-
-const FALLBACK_IMAGE =
-  'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=400&q=80';
 
 export interface CelebrationVenueCardProps {
   venue: Venue;
@@ -19,6 +16,7 @@ export const CelebrationVenueCard: React.FC<CelebrationVenueCardProps> = ({
   venue,
   roomLocation,
 }) => {
+  const smartFallback = getSmartFoodPhoto(venue.category, venue.name, venue.id);
   const priceTier = formatPriceTier(venue.priceLevel);
   const distanceKm =
     venue.distanceKm ??
@@ -35,16 +33,16 @@ export const CelebrationVenueCard: React.FC<CelebrationVenueCardProps> = ({
     <div className="bg-white rounded-2xl border border-[#E7E2D9] overflow-hidden shadow-xs text-left">
       <div className="relative w-full h-40 bg-stone-100">
         <img
-          src={venue.photoUrl || FALLBACK_IMAGE}
+          src={venue.photoUrl || smartFallback}
           alt={venue.name}
           className="w-full h-full object-cover"
           onError={(e) => {
             e.currentTarget.onerror = null;
-            e.currentTarget.src = FALLBACK_IMAGE;
+            e.currentTarget.src = smartFallback;
           }}
         />
         {distanceKm !== undefined && (
-          <div className="absolute bottom-2.5 right-2.5 bg-[#1C1917]/80 backdrop-blur-xs text-white text-[10px] font-semibold px-2 py-0.5 rounded-full">
+          <div className="absolute bottom-2.5 right-2.5 bg-[#1C1917]/85 backdrop-blur-xs text-white text-[10px] font-semibold px-2 py-0.5 rounded border border-white/10">
             ~{distanceKm} km
           </div>
         )}

@@ -36,7 +36,7 @@ export const DeckExhausted: React.FC<DeckExhaustedProps> = ({
         </div>
 
         <div>
-          <span className="inline-block text-xs font-medium text-[#78716C] bg-[#FAF7F2] border border-[#E7E2D9] px-3 py-1 rounded-full">
+          <span className="inline-block text-[11px] font-semibold uppercase tracking-wider text-[#78716C] bg-[#FAF7F2] border border-[#E7E2D9] px-2.5 py-0.5 rounded">
             Ortak karar bulunamadı
           </span>
           <h2 className="font-display font-extrabold text-2xl text-[#1C1917] mt-2">

@@ -46,7 +46,7 @@ export const RoomWaitingView: React.FC<RoomWaitingViewProps> = ({
     <div className="bg-white rounded-2xl border border-[#E7E2D9] p-5 text-center shadow-xs">
       <div className="flex items-center justify-between mb-2 text-xs font-semibold uppercase tracking-wider text-[#78716C]">
         <span>Oda Kodu</span>
-        <span className="text-[#D9381E] bg-[#FDF2F0] px-2 py-0.5 rounded">Özel Masa</span>
+        <span className="text-[#D9381E] bg-[#FDF2F0] border border-[#FCDAD7] px-2 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wider">Özel Masa</span>
       </div>
 
       {/* 4-Digit Display */}
@@ -90,13 +90,13 @@ export const RoomWaitingView: React.FC<RoomWaitingViewProps> = ({
           <span>Odada {Object.keys(room.participants).length} / 2 kişi var</span>
         </div>
         <span
-          className={`text-xs font-medium px-2 py-0.5 rounded-full ${
+          className={`text-[11px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded border ${
             isPeerReady
-              ? 'bg-[#E8F5E9] text-[#2D6A4F]'
-              : 'bg-[#FFF3E0] text-[#E65100]'
+              ? 'bg-[#E8F5E9] text-[#2D6A4F] border-[#C8E6C9]'
+              : 'bg-[#FAF7F2] text-[#78716C] border-[#E7E2D9]'
           }`}
         >
-          {isPeerReady ? '● Hazır' : '○ Bekleniyor'}
+          {isPeerReady ? 'Hazır' : 'Bekleniyor'}
         </span>
       </div>
 
@@ -189,10 +189,10 @@ export const RoomWaitingView: React.FC<RoomWaitingViewProps> = ({
           </p>
         </div>
       ) : (
-        <div className="mt-3 pt-3 border-t border-[#E7E2D9] text-center">
-          <p className="text-xs text-[#E65100] font-medium flex items-center justify-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-[#E65100] animate-pulse" />
-            Oylamayı başlatmak için partnerinin odaya katılması bekleniyor...
+        <div className="mt-3.5 pt-3.5 border-t border-[#E7E2D9] text-center">
+          <p className="text-xs text-[#78716C] flex items-center justify-center gap-2">
+            <Users className="w-3.5 h-3.5 text-[#A8A29E]" />
+            <span>Oylamayı başlatmak için partnerinin odaya katılması bekleniyor.</span>
           </p>
         </div>
       )}
@@ -227,8 +227,8 @@ export const RoomWaitingView: React.FC<RoomWaitingViewProps> = ({
                 <p className="text-[10px] font-bold uppercase tracking-wider text-[#D9381E]">
                   SEÇKİ HAVUZU
                 </p>
-                <span className="inline-flex items-center gap-1 text-[9px] text-[#2D6A4F] bg-[#E8F5E9] border border-[#C8E6C9] px-1.5 py-0.2 rounded-full font-bold">
-                  <Eye className="w-2.5 h-2.5" />
+                <span className="inline-flex items-center gap-1 text-[10px] text-[#2D6A4F] bg-[#E8F5E9] border border-[#C8E6C9] px-2 py-0.5 rounded font-semibold uppercase tracking-wider">
+                  <Eye className="w-3 h-3" />
                   Mekanları Gör
                 </span>
               </div>
@@ -244,7 +244,7 @@ export const RoomWaitingView: React.FC<RoomWaitingViewProps> = ({
           <button
             type="button"
             onClick={onOpenDistrictSelector}
-            className="text-[10px] text-[#78716C] hover:text-[#1C1917] bg-white border border-[#E7E2D9] px-2 py-1 rounded-lg font-semibold shrink-0 cursor-pointer"
+            className="text-[11px] text-[#78716C] hover:text-[#1C1917] bg-white border border-[#E7E2D9] px-2.5 py-1 rounded font-semibold shrink-0 cursor-pointer transition-colors"
           >
             Bölge Değiştir
           </button>
