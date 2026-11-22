@@ -5,11 +5,15 @@ import { TugOfWarBar } from './TugOfWarBar.js';
 export interface SplitScreenDuelProps {
   onComplete: (winnerRole: 'p1' | 'p2', scores: { p1: number; p2: number }) => void;
   durationMs?: number;
+  player1Name?: string;
+  player2Name?: string;
 }
 
 export const SplitScreenDuelView: React.FC<SplitScreenDuelProps> = ({
   onComplete,
   durationMs = 5000,
+  player1Name,
+  player2Name,
 }) => {
   const [p1Score, setP1Score] = useState(0);
   const [p2Score, setP2Score] = useState(0);
@@ -93,8 +97,8 @@ export const SplitScreenDuelView: React.FC<SplitScreenDuelProps> = ({
         style={{ touchAction: 'none' }}
         className="flex-1 bg-white text-[#1C1917] flex flex-col items-center justify-center rotate-180 active:bg-[#FAF7F2] transition-colors cursor-pointer select-none"
       >
-        <span className="text-xs uppercase tracking-widest font-semibold text-[#78716C]">
-          Oyuncu 1
+        <span className="text-xs uppercase tracking-widest font-semibold text-[#78716C] max-w-[200px] truncate text-center">
+          {player1Name || 'Oyuncu 1'}
         </span>
         <span className="text-sm uppercase tracking-wider font-semibold text-[#E07A5F] mt-1">
           Dokun
@@ -112,7 +116,12 @@ export const SplitScreenDuelView: React.FC<SplitScreenDuelProps> = ({
             style={{ width: `${(timeLeftMs / durationMs) * 100}%` }}
           />
         </div>
-        <TugOfWarBar score1={p1Score} score2={p2Score} label1="P1" label2="P2" />
+        <TugOfWarBar
+          score1={p1Score}
+          score2={p2Score}
+          label1={player1Name ? player1Name.slice(0, 8) : 'P1'}
+          label2={player2Name ? player2Name.slice(0, 8) : 'P2'}
+        />
       </div>
 
       {/* Bottom Half: Player 2 (Normal 0° Orientation) */}
@@ -122,8 +131,8 @@ export const SplitScreenDuelView: React.FC<SplitScreenDuelProps> = ({
         style={{ touchAction: 'none' }}
         className="flex-1 bg-white text-[#1C1917] flex flex-col items-center justify-center active:bg-[#FAF7F2] transition-colors cursor-pointer select-none"
       >
-        <span className="text-xs uppercase tracking-widest font-semibold text-[#78716C]">
-          Oyuncu 2
+        <span className="text-xs uppercase tracking-widest font-semibold text-[#78716C] max-w-[200px] truncate text-center">
+          {player2Name || 'Oyuncu 2'}
         </span>
         <span className="text-sm uppercase tracking-wider font-semibold text-[#2D6A4F] mt-1">
           Dokun

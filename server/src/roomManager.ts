@@ -338,6 +338,13 @@ export class RoomManager {
 
     participant.connected = false;
     participant.disconnectedAt = Date.now();
+
+    // Clear active duel timer immediately if someone disconnects mid-duel to prevent zombie match conclusion
+    if (room.status === 'duel' && room.duelState?.timer) {
+      clearTimeout(room.duelState.timer);
+      room.duelState.timer = undefined;
+    }
+
     this.repository.save(room);
     const reconnectWindowMs = 30000;
 
@@ -357,18 +364,42 @@ export class RoomManager {
         const currentPart = currentRoom.participants[userId];
         if (currentPart && !currentPart.connected) {
           delete currentRoom.participants[userId];
+
+          // Clear active duel timer and reset duelState on permanent disconnect
+          if (currentRoom.duelState?.timer) {
+            clearTimeout(currentRoom.duelState.timer);
+            currentRoom.duelState.timer = undefined;
+          }
+          if (currentRoom.status === 'duel') {
+            currentRoom.status = 'waiting';
+            delete currentRoom.duelState;
+          }
+
           if (currentRoom.peerId === userId) {
             delete currentRoom.peerId;
             currentRoom.status = 'waiting';
           }
+          if (currentRoom.hostId === userId) {
+            const remaining = Object.keys(currentRoom.participants);
+            if (remaining.length > 0) {
+              currentRoom.hostId = remaining[0];
+              if (currentRoom.participants[remaining[0]]) {
+                currentRoom.participants[remaining[0]].role = 'host';
+              }
+              delete currentRoom.peerId;
+              currentRoom.status = 'waiting';
+            }
+          }
+
           // If all left, purge room
           if (Object.keys(currentRoom.participants).length === 0) {
-            if (currentRoom.duelState?.timer) {
-              clearTimeout(currentRoom.duelState.timer);
-            }
             this.repository.delete(roomCode);
           } else {
             this.repository.save(currentRoom);
+            this.broadcastToRoom(roomCode, {
+              type: 'ROOM_STATE',
+              room: currentRoom,
+            });
           }
         }
       }

@@ -4,7 +4,6 @@ import { AlertCircle } from 'lucide-react';
 import logoImg from '../assets/logo.jpg';
 import { DistrictSelector } from './DistrictSelector.js';
 import { VenueListModal } from './VenueListModal.js';
-import { SwipeDeck } from './SwipeDeck.js';
 import { RoomWaitingView } from './RoomWaitingView.js';
 import { LocationPill } from './lobby/LocationPill.js';
 import { CreateRoomCard } from './lobby/CreateRoomCard.js';
@@ -23,20 +22,12 @@ export const Lobby: React.FC<LobbyProps> = ({ socket }) => {
     connectionStatus,
     error,
     peerDisconnectSeconds,
-    partnerProgress,
-    matchedVenue,
-    isDeckExhausted,
-    duelState,
     createRoom,
     joinRoom,
     updateNickname,
     leaveRoom,
     setLocation,
     startSwiping,
-    sendSwipe,
-    startDuel,
-    sendDuelTap,
-    resolveSplitDuel,
   } = socket;
 
   const [inputPin, setInputPin] = useState('');
@@ -94,31 +85,6 @@ export const Lobby: React.FC<LobbyProps> = ({ socket }) => {
       coords: pendingLocation.coords,
     });
   };
-
-  // If room is currently swiping, matched, or duel, delegate to SwipeDeck
-  if (
-    room &&
-    currentUser &&
-    (room.status === 'swiping' || room.status === 'matched' || room.status === 'duel')
-  ) {
-    return (
-      <SwipeDeck
-        room={room}
-        currentUser={currentUser}
-        peer={peer}
-        partnerProgress={partnerProgress}
-        matchedVenue={matchedVenue}
-        isDeckExhausted={isDeckExhausted}
-        duelState={duelState}
-        onSwipe={sendSwipe}
-        onLeave={leaveRoom}
-        onStartOnlineDuel={() => startDuel('online')}
-        onStartSplitDuel={() => startDuel('split')}
-        onSendDuelTap={sendDuelTap}
-        onResolveSplitDuel={resolveSplitDuel}
-      />
-    );
-  }
 
   const activeLocationLabel = room?.location?.label || pendingLocation.label;
 

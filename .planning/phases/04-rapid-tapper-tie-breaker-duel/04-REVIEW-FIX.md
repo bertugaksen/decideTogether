@@ -3,21 +3,21 @@ phase: 04-rapid-tapper-tie-breaker-duel
 fixed_at: 2026-11-13T08:23:00Z
 review_path: C:/Users/Casper/Desktop/Vibe Coding/decideTogether/.planning/phases/04-rapid-tapper-tie-breaker-duel/04-REVIEW.md
 iteration: 1
-findings_in_scope: 7
-fixed: 7
+findings_in_scope: 10
+fixed: 10
 skipped: 0
 status: all_fixed
 ---
 
 # Phase 04: Code Review Fix Report — Rapid Tapper Tie-Breaker Duel
 
-**Fixed at:** 2026-11-13T08:23:00Z  
+**Fixed at:** 2026-11-22T14:15:00Z  
 **Source review:** `C:/Users/Casper/Desktop/Vibe Coding/decideTogether/.planning/phases/04-rapid-tapper-tie-breaker-duel/04-REVIEW.md`  
-**Iteration:** 1  
+**Iteration:** 2  
 
 **Summary:**
-- Findings in scope: 7
-- Fixed: 7
+- Findings in scope: 10
+- Fixed: 10
 - Skipped: 0
 
 ## Verification Environment
@@ -67,8 +67,23 @@ Verification was performed in the main checkout with `workflow.use_worktrees: fa
 **Commit:** `569088a`  
 **Applied fix:** Extracted audio triggers, timer intervals, and timeout scheduling out of the `setStep` updater callback into pure effect logic with robust teardown cleanup.
 
+### IN-01: Impossible-State Guard — Unreachable `SwipeDeck` Branch in `Lobby.tsx`
+
+**Files modified:** `client/src/components/Lobby.tsx`  
+**Applied fix:** Removed dead `SwipeDeck` rendering branch and redundant imports and socket properties, restricting `Lobby.tsx` strictly to lobby and waiting states.
+
+### IN-02: Generic Player Labels in `SplitScreenDuelView` Obscure Which Half Represents Host vs Peer Preferences
+
+**Files modified:** `client/src/components/SplitScreenDuelView.tsx`, `client/src/components/RapidTapperDuel.tsx`, `client/src/components/SwipeDeck.tsx`  
+**Applied fix:** Extended `SplitScreenDuelView` and `RapidTapperDuel` props to accept and display actual player nicknames on top/bottom split screens and on the central `TugOfWarBar`.
+
+### IN-03: Active Duel Timer Not Cancelled When a Participant Disconnects During Grace Period
+
+**Files modified:** `server/src/roomManager.ts`, `server/src/tests/duel.test.ts`  
+**Applied fix:** Cleared `room.duelState?.timer` immediately in `handleDisconnect` when someone disconnects mid-duel, and in the 30-second permanent disconnect timeout handler.
+
 ---
 
-_Fixed: 2026-11-13T08:23:00Z_  
-_Fixer: the agent (gsd-code-fixer)_  
-_Iteration: 1_  
+_Fixed: 2026-11-22T14:15:00Z_  
+_Fixer: Antigravity_  
+_Iteration: 2_  

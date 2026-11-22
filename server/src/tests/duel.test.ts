@@ -234,3 +234,42 @@ test('resolveDuelWinner - selects winner likes, falls back to peer likes, falls 
   const winnerVenue3 = manager.resolveDuelWinner(room.code, host.id);
   assert.strictEqual(winnerVenue3?.id, venue0.id);
 });
+
+test('handleDisconnect - cancels active duel timer when participant drops during duel (IN-03)', async () => {
+  const manager = new RoomManager();
+  const hostMock = createMockSocket();
+  const peerMock = createMockSocket();
+
+  const { room } = await manager.createRoom(hostMock.ws, 'Host');
+  manager.joinRoom(peerMock.ws, room.code, undefined, 'Peer');
+
+  room.status = 'duel';
+  manager.startDuel(hostMock.ws, 'online');
+
+  assert.ok(room.duelState?.timer, 'Duel timer should be active');
+
+  // Peer drops connection during duel
+  manager.handleDisconnect(peerMock.ws);
+
+  assert.strictEqual(room.duelState?.timer, undefined, 'Duel timer should be cleared on disconnect');
+});
+
+test('leaveRoom - cancels active duel timer when participant leaves during duel (IN-03)', async () => {
+  const manager = new RoomManager();
+  const hostMock = createMockSocket();
+  const peerMock = createMockSocket();
+
+  const { room } = await manager.createRoom(hostMock.ws, 'Host');
+  manager.joinRoom(peerMock.ws, room.code, undefined, 'Peer');
+
+  room.status = 'duel';
+  manager.startDuel(hostMock.ws, 'online');
+
+  assert.ok(room.duelState?.timer, 'Duel timer should be active');
+
+  // Peer explicitly leaves room
+  manager.leaveRoom(peerMock.ws);
+
+  assert.strictEqual(room.duelState?.timer, undefined, 'Duel timer should be cleared on leaveRoom');
+  assert.strictEqual(room.status, 'waiting', 'Room should reset to waiting');
+});

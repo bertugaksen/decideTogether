@@ -33,19 +33,19 @@ findings:
     title: "Impure React State Updater in `DuelCountdown` Causes Double Audio Playback and Leaked Timeout References"
   - id: IN-01
     severity: info
-    disposition: open
+    disposition: fixed
     title: "Impossible-State Guard — Unreachable `SwipeDeck` Branch in `Lobby.tsx`"
   - id: IN-02
     severity: info
-    disposition: open
+    disposition: fixed
     title: "Generic Player Labels in `SplitScreenDuelView` Obscure Which Half Represents Host vs Peer Preferences"
   - id: IN-03
     severity: info
-    disposition: open
+    disposition: fixed
     title: "Active Duel Timer Not Cancelled When a Participant Disconnects During Grace Period"
-open: 3
+open: 0
 total: 10
-recorded: 2026-11-13T05:25:59.159Z
+recorded: 2026-11-22T11:15:11.618Z
 ---
 
 # Phase 04: Code Review Disposition
@@ -59,9 +59,9 @@ recorded: 2026-11-13T05:25:59.159Z
 | WR-02 | warning | fixed | 04-REVIEW-FIX.md |
 | WR-03 | warning | fixed | 04-REVIEW-FIX.md |
 | WR-04 | warning | fixed | 04-REVIEW-FIX.md |
-| IN-01 | info | open | - |
-| IN-02 | info | open | - |
-| IN-03 | info | open | - |
+| IN-01 | info | fixed | 04-REVIEW-FIX.md |
+| IN-02 | info | fixed | 04-REVIEW-FIX.md |
+| IN-03 | info | fixed | 04-REVIEW-FIX.md |
 
 Dispositions: open (recorded, not yet triaged), ixed, skipped, deferred.
 Set deferred by hand and put the reason in the Source cell; both are preserved. A | in the reason is kept as prose and escaped on the next run.

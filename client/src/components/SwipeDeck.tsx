@@ -121,6 +121,8 @@ export const SwipeDeck: React.FC<SwipeDeckProps> = ({
 
     const opponentId = peer?.id;
     const opponentScore = opponentId && duelState.scores ? duelState.scores[opponentId] || 0 : 0;
+    const hostNickname = currentUser.id === room.hostId ? currentUser.nickname : peer?.nickname;
+    const peerNickname = currentUser.id === room.hostId ? peer?.nickname : currentUser.nickname;
 
     return (
       <RapidTapperDuel
@@ -130,6 +132,8 @@ export const SwipeDeck: React.FC<SwipeDeckProps> = ({
         currentUser={currentUser}
         peer={peer}
         opponentScore={opponentScore}
+        player1Name={hostNickname}
+        player2Name={peerNickname}
         onSendTapBatch={handleSendTapBatch}
         onSplitComplete={handleSplitComplete}
         onOnlineFinish={handleOnlineFinish}
