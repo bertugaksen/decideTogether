@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
-import { createServer } from 'http';
+import { createServer, IncomingMessage } from 'http';
 import { WebSocketServer, WebSocket } from 'ws';
 import { RoomManager } from './roomManager.js';
 import { ClientMessage } from './types.js';
@@ -9,12 +9,17 @@ import { MOCK_DISTRICTS } from './services/mockVenues.js';
 import { isValidCoordinate } from './services/venueService.js';
 import { getSmartFoodPhoto } from '@decidetogether/shared';
 import { logger } from './logger.js';
+import { generalApiLimiter, locationResolveLimiter, photoProxyLimiter } from './middleware/rateLimiter.js';
+import { wsRateLimiter, getClientIp } from './services/wsRateLimiter.js';
 
 const app = express();
 const port = process.env.PORT || 3001;
 
 app.use(cors());
 app.use(express.json());
+
+// Global API Rate Limiting
+app.use('/api', generalApiLimiter);
 
 const roomManager = new RoomManager();
 
@@ -41,7 +46,7 @@ app.get('/api/districts', (_req, res) => {
 });
 
 // Resolve GPS Location or District (VENUE-01)
-app.get('/api/locations/resolve', async (req, res) => {
+app.get('/api/locations/resolve', locationResolveLimiter, async (req, res) => {
   const latStr = req.query.lat as string | undefined;
   const lngStr = req.query.lng as string | undefined;
   const districtId = req.query.districtId as string | undefined;
@@ -66,7 +71,7 @@ app.get('/api/locations/resolve', async (req, res) => {
 // Photo Proxy Endpoint (VENUE-02 - protects GOOGLE_PLACES_API_KEY from exposure, T-02-01)
 const VALID_PHOTO_NAME_REGEX = /^places\/[A-Za-z0-9_-]+\/photos\/[A-Za-z0-9_-]+$/;
 
-app.get('/api/venues/photo', async (req, res) => {
+app.get('/api/venues/photo', photoProxyLimiter, async (req, res) => {
   const photoName = req.query.name as string;
   const category = (req.query.cat as string) || '';
   const title = (req.query.title as string) || '';
@@ -115,9 +120,40 @@ const server = createServer(app);
 // WebSocket Server
 const wss = new WebSocketServer({ server, path: '/ws' });
 
-wss.on('connection', (ws: WebSocket) => {
+wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
+  const clientIp = getClientIp(req);
+
+  // Check per-IP connection rate limit
+  const connCheck = wsRateLimiter.checkConnectionRate(clientIp);
+  if (!connCheck.allowed) {
+    logger.warn('WebSocket connection rejected due to IP connection rate limit', { ip: clientIp });
+    ws.close(1008, 'Too many connections from this IP');
+    return;
+  }
+
   // Listen for client messages
   ws.on('message', async (data: string) => {
+    // Check message rate limit
+    const rateCheck = wsRateLimiter.checkMessageRate(ws);
+    if (!rateCheck.allowed) {
+      if (rateCheck.closeConnection) {
+        logger.warn('WebSocket connection closed due to message flooding abuse', { clientIp });
+        ws.close(1008, 'Rate limit abuse');
+        return;
+      }
+
+      logger.warn('WebSocket message rate limit exceeded', { clientIp, count: rateCheck.count });
+      if (ws.readyState === WebSocket.OPEN) {
+        ws.send(
+          JSON.stringify({
+            type: 'ERROR',
+            message: 'Çok fazla WebSocket mesajı gönderildi, lütfen yavaşlayın',
+          })
+        );
+      }
+      return;
+    }
+
     try {
       const message: ClientMessage = JSON.parse(data.toString());
 
@@ -215,11 +251,13 @@ wss.on('connection', (ws: WebSocket) => {
 
   // Handle client disconnect
   ws.on('close', () => {
+    wsRateLimiter.removeSocket(ws);
     roomManager.handleDisconnect(ws);
   });
 
   ws.on('error', (err) => {
     logger.error('WebSocket connection error', err);
+    wsRateLimiter.removeSocket(ws);
     roomManager.handleDisconnect(ws);
   });
 });
