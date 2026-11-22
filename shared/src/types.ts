@@ -40,7 +40,7 @@ export interface District {
     lat: number;
     lng: number;
   };
-  sampleCuisines: string[]; // ["Pizza & Şarap", "Sokak Lezzetleri", "Burger & Bira"]
+  sampleCuisines?: string[];
 }
 
 export interface RoomLocation {

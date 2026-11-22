@@ -356,6 +356,99 @@ export async function fetchGooglePlacesNearby(
   }
 }
 
+/**
+ * Reverse geocodes coordinates to a clean district & city label in Turkish.
+ * Uses BigDataCloud free client API, optionally Google Geocoding if API key is provided,
+ * and falls back to nearest preset district.
+ */
+export async function reverseGeocodeLocation(
+  lat: number,
+  lng: number,
+  apiKey?: string
+): Promise<{ label: string; districtId: string }> {
+  const nearest = findNearestDistrict(lat, lng);
+
+  // 1. If Google Places/Geocoding API key is present, try Google Geocoding first
+  if (apiKey) {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 4000);
+      const url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${apiKey}&language=tr`;
+      const res = await fetch(url, { signal: controller.signal });
+      clearTimeout(timeoutId);
+
+      if (res.ok) {
+        const data = (await res.json()) as any;
+        if (data.results && data.results.length > 0) {
+          const comp = data.results[0].address_components || [];
+          const getComponent = (type: string) =>
+            comp.find((c: any) => c.types.includes(type))?.long_name;
+
+          const district =
+            getComponent('administrative_area_level_2') ||
+            getComponent('sublocality_level_1') ||
+            getComponent('sublocality');
+          const city =
+            getComponent('administrative_area_level_1') ||
+            getComponent('locality');
+
+          if (district && city) {
+            const formatted =
+              district.toLowerCase() === city.toLowerCase()
+                ? `${city} (GPS)`
+                : `${district}, ${city} (GPS)`;
+            return {
+              label: formatted,
+              districtId: nearest.id,
+            };
+          }
+        }
+      }
+    } catch {
+      // Ignore and fallback to BigDataCloud
+    }
+  }
+
+  // 2. Free, high-accuracy reverse geocode client (BigDataCloud)
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 3500);
+    const url = `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=tr`;
+    const res = await fetch(url, { signal: controller.signal });
+    clearTimeout(timeoutId);
+
+    if (res.ok) {
+      const data = (await res.json()) as any;
+      const district =
+        data.locality ||
+        data.city ||
+        data.localityInfo?.administrative?.find((a: any) => a.adminLevel === 6)?.name;
+      const city =
+        data.principalSubdivision ||
+        data.localityInfo?.administrative?.find((a: any) => a.adminLevel === 4)?.name;
+
+      if (district && city) {
+        const formatted =
+          district.toLowerCase() === city.toLowerCase()
+            ? `${city} (GPS)`
+            : `${district}, ${city} (GPS)`;
+        return {
+          label: formatted,
+          districtId: nearest.id,
+        };
+      }
+    }
+  } catch {
+    // Ignore and fallback to nearest preset
+  }
+
+  // 3. Fallback to nearest preset district
+  return {
+    label: `${nearest.name} (GPS)`,
+    districtId: nearest.id,
+  };
+}
+
 export class VenueService {
   private cache: VenueCache;
   private apiKey?: string;
@@ -407,10 +500,10 @@ export class VenueService {
     if (hasValidCoords && coords) {
       const geoKey = getCoordinateCacheKey(coords.lat, coords.lng);
       const cached = this.cache.get(geoKey);
-      const nearest = findNearestDistrict(coords.lat, coords.lng);
+      const geo = await reverseGeocodeLocation(coords.lat, coords.lng, this.apiKey);
       const location: RoomLocation = {
-        districtId: nearest.id,
-        label: `${nearest.name} (GPS)`,
+        districtId: geo.districtId,
+        label: geo.label,
         coords,
         isGps: true,
       };
@@ -425,6 +518,7 @@ export class VenueService {
       }
 
       if (!organic || organic.length === 0) {
+        const nearest = findNearestDistrict(coords.lat, coords.lng);
         organic = MOCK_VENUES[nearest.id] || MOCK_VENUES['kadikoy-moda'];
       }
 

@@ -173,13 +173,13 @@ export const DistrictSelector: React.FC<DistrictSelectorProps> = ({
                         {d.name}
                       </p>
                       {isSelected && (
-                        <span className="text-[10px] font-semibold bg-[#D9381E] text-white px-1.5 py-0.2 rounded-full">
+                        <span className="text-[10px] font-semibold bg-[#D9381E] text-white px-2 py-0.5 rounded uppercase tracking-wider">
                           Aktif
                         </span>
                       )}
                     </div>
                     <p className="text-xs text-[#78716C] truncate mt-0.5">
-                      {d.sampleCuisines.join(' • ')}
+                      {d.city}
                     </p>
                   </div>
 
