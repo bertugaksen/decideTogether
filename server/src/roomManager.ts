@@ -26,11 +26,12 @@ export class RoomManager {
   private repository: IRoomRepository;
   private clients: Map<WebSocket, ConnectedClient> = new Map();
   private disconnectTimeouts: Map<string, NodeJS.Timeout> = new Map();
-  private venueService: VenueService = new VenueService();
+  private venueService: VenueService;
   private cleanupInterval?: NodeJS.Timeout;
 
-  constructor(repository: IRoomRepository = new SqliteRoomRepository()) {
+  constructor(repository: IRoomRepository = new SqliteRoomRepository(), venueService?: VenueService) {
     this.repository = repository;
+    this.venueService = venueService || new VenueService();
 
     // Periodic cleanup of abandoned rooms (>24h TTL) every 30 minutes
     this.cleanupInterval = setInterval(() => {

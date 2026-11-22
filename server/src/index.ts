@@ -1,4 +1,16 @@
-import 'dotenv/config';
+import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+// Robust multi-path env loader: handles both root and workspace executions
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+dotenv.config(); // default cwd
+dotenv.config({ path: path.resolve(process.cwd(), '../.env') });
+dotenv.config({ path: path.resolve(__dirname, '../../.env') });
+dotenv.config({ path: path.resolve(__dirname, '../../../.env') });
+
 import express from 'express';
 import cors from 'cors';
 import { createServer, IncomingMessage } from 'http';
@@ -14,6 +26,10 @@ import { wsRateLimiter, getClientIp } from './services/wsRateLimiter.js';
 
 const app = express();
 const port = process.env.PORT || 3001;
+
+logger.info(
+  `Google Places API: ${process.env.GOOGLE_PLACES_API_KEY ? 'CONFIGURED (Live Places Discovery Active)' : 'NOT CONFIGURED (Using Fallback Mock)'}`
+);
 
 app.use(cors());
 app.use(express.json());

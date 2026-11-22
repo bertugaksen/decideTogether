@@ -473,14 +473,19 @@ export class VenueService {
     let organicVenues: Venue[] = [];
 
     if (this.apiKey && district) {
+      console.log(`[VenueService] Querying Google Places for district ${district.id} (${district.center.lat}, ${district.center.lng})...`);
       organicVenues = await fetchGooglePlacesNearby(
         district.center.lat,
         district.center.lng,
         this.apiKey
       );
+      console.log(`[VenueService] Google Places returned ${organicVenues.length} live venues for ${district.id}.`);
+    } else if (!this.apiKey) {
+      console.warn(`[VenueService] No Google Places API key configured for district ${districtId}.`);
     }
 
     if (!organicVenues || organicVenues.length === 0) {
+      console.warn(`[VenueService] Using fallback mock venues for district ${districtId}.`);
       organicVenues = MOCK_VENUES[districtId] || MOCK_VENUES['kadikoy-moda'];
     }
 
@@ -514,10 +519,15 @@ export class VenueService {
 
       let organic: Venue[] = [];
       if (this.apiKey) {
+        console.log(`[VenueService] Querying Google Places for coords (${coords.lat}, ${coords.lng})...`);
         organic = await fetchGooglePlacesNearby(coords.lat, coords.lng, this.apiKey);
+        console.log(`[VenueService] Google Places returned ${organic.length} live venues for GPS coords.`);
+      } else {
+        console.warn(`[VenueService] No Google Places API key configured for GPS coords!`);
       }
 
       if (!organic || organic.length === 0) {
+        console.warn(`[VenueService] Using fallback mock venues for GPS coords (${coords.lat}, ${coords.lng}).`);
         const nearest = findNearestDistrict(coords.lat, coords.lng);
         organic = MOCK_VENUES[nearest.id] || MOCK_VENUES['kadikoy-moda'];
       }
